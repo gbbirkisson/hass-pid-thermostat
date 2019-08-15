@@ -1,4 +1,3 @@
-import atexit
 import logging
 
 
@@ -32,7 +31,6 @@ class Hass:
         assert config is not None, "config cannot be None"
         logging.info('Connecting to hass')
         self._mqtt_client.publish(self.get_topic('config'), config)
-        atexit.register(self.disconnect)
 
     def disconnect(self):
         logging.info('Exiting, removing component from hass')

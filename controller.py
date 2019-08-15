@@ -4,7 +4,7 @@ import time
 
 def temperatures(thermometer, kill_func):
     while not kill_func():
-        current_temperature = thermometer()  # TODO: Try catch?
+        current_temperature = thermometer()
         logging.debug("Current temperature is {0:.2f}".format(current_temperature))
         yield current_temperature
 
@@ -49,7 +49,7 @@ def ssr_state(pid, thermometer, enabled_func, kill_func):
 
 def control_ssr(pid, ssr, thermometer, enabled_func, delay_func, kill_func):
     for on_off in ssr_state(pid, thermometer, enabled_func, kill_func):
-        ssr(on_off)  # TODO: Try catch?
+        ssr(on_off)
         delay_func()
 
 

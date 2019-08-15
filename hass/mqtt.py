@@ -12,12 +12,15 @@ class Mqtt:
     def __init__(
             self,
             id,
-            host='localhost'
+            host
     ):
         assert id is not None, "id cannot be none"
 
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.INFO)
+
         self._mqtt_client = MqttClient(id)
-        self._mqtt_client.enable_logger(logging.getLogger(__name__))
+        self._mqtt_client.enable_logger(logger)
         self._mqtt_client.connect(host)
         self._mqtt_client.on_message = self._on_message
         self._mqtt_client.loop_start()

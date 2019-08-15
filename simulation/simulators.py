@@ -7,7 +7,7 @@ from controller import create_controller
 
 water_specific_heat = 4184  # 4184 watts will heat a 1L of water up by 1°C every second
 room_temperature = 18
-liters = 1
+liters = 5
 boiler_watts = 4184
 
 
@@ -40,7 +40,7 @@ class FakeThermostat:
         else:
             temperature_loss = 1 / 60 * dt  # 60 sec to lose 1°c .... maybe use exponential decay ??
             temperature_loss = temperature_loss * self._invert_constant
-            if self._invert_constant:
+            if self._invert_constant < 0:
                 clamp = min
             else:
                 clamp = max
