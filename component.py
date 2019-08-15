@@ -7,6 +7,7 @@ from simple_pid import PID
 from controller import create_controller
 from hass.utils import build_component
 from simulation.simulators import FakeThermostat
+from ssr import get_ssr
 from thermometer import get_thermometer
 from utils import env, Component, env_float, call_repeatedly, env_bool
 
@@ -14,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 logging.info("Setting up environment")
 SIMULATE = env_bool('SIMULATE', '0')
-SSR_PIN = env('SSR_PIN', 'XXX')
+SSR_PIN = env('SSR_PIN', 'GPIO18')
 TEMP_POLL_INTERVAL = env_float("TEMP_POLL_INTERVAL", 0.5)
 
 COMPONENT_MODE = env('COMPONENT_MODE', 'heat')
@@ -68,8 +69,7 @@ else:
     thermometer = get_thermometer()
 
     logging.info("Initializing SSR")
-    fake = FakeThermostat()  # TODO: Switch to the real deal
-    ssr = fake.ssr
+    ssr = get_ssr(SSR_PIN)
 
 logging.info("Initializing PID")
 component = Component()

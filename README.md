@@ -36,7 +36,7 @@ mqtt:
 
 | Environmental variable | Required | Default                     | Description                                                                                                                  |
 | ---------------------- | -------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| SSR_PIN                | no       | TODO                        | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the SSR is connected to |
+| SSR_PIN                | no       | GPIO18                      | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the SSR is connected to |
 | TEMP_POLL_INTERVAL     | no       | 0.5                         | Seconds between new temperature readings                                                                                     |
 | HASS_ID                | no       | hass_thermostat_(heat/cool) | Id for component in hass.io                                                                                                  |
 | HASS_NAME              | no       | Brew (Boiler/Cooler)        | Name that show up in the hass.io UI                                                                                          |
