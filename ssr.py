@@ -1,20 +1,20 @@
 import logging
-import os
 
 from gpiozero import LED
 
 
-def get_ssr():
-    pin = os.environ.get("SSR_PIN")
-    assert pin is not None, "SSR pin is None, set it with env var SSR_PIN"
-    ssr = LED(pin)
-    is_on = False
+class _SSR:
 
-    def toggle(on):
-        global is_on
-        if is_on != on:
+    def __init__(self, pin):
+        self._on = False
+        self._led = LED(pin)
+
+    def __call__(self, on):
+        if self._on != on:
             logging.debug("SSR set {}".format("ON" if on else "OFF"))
-            is_on = on
-            ssr.value(on)
+            self._on = on
+            self._led.value(on)
 
-    return toggle
+
+def get_ssr(pin):
+    return _SSR(pin)
