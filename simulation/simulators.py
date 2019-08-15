@@ -52,7 +52,7 @@ class FakeThermostat:
 
 def create_simulator(pid, invert):
     thermostat = FakeThermostat(invert=invert)
-    return create_controller(pid, thermostat.ssr, thermostat.thermometer, sleep_func=lambda: time.sleep(0.3))
+    return create_controller(pid, thermostat.ssr, thermostat.thermometer, delay_func=lambda: time.sleep(0.3))
 
 
 def heater_simulator():
