@@ -1,4 +1,4 @@
-<h1>hass-pid-thermostat<h1>
+<h1>hass-pid-thermostat</h1>
 
 A PID (climate) controller for [Home Assistant](https://www.home-assistant.io/) to heat/cool something using a thermometer and a SSR relay.
 
