@@ -41,7 +41,7 @@ mqtt:
 | HASS_ID                | no       | hass_thermostat_(heat/cool) | Id for component in hass.io                                                                                                  |
 | HASS_NAME              | no       | Brew (Boiler/Cooler)        | Name that show up in the hass.io UI                                                                                          |
 | HASS_UPDATE_INTERVAL   | no       | 2                           | Seconds between updates being sent to hass.io                                                                                |
-| HASS_HOST              | no       | hassio.local                | The host of hass.io                                                                                                          |
+| MQTT_HOST              | no       | hassio.local                | The host of the MQTT server to communicate with hass.io                                                                      |
 | PID_P_GAIN             | no       | 2.5                         | PID proportional gain                                                                                                        |
 | PID_I_GAIN             | no       | 0.005                       | PID integral gain                                                                                                            |
 | PID_D_GAIN             | no       | 0.2                         | PID derivative gain                                                                                                          |

@@ -8,12 +8,12 @@ from controller import create_controller
 from hass.utils import build_component
 from simulation.simulators import FakeThermostat
 from thermometer import get_thermometer
-from utils import env, Component, env_float, call_repeatedly
+from utils import env, Component, env_float, call_repeatedly, env_bool
 
 logging.basicConfig(level=logging.DEBUG)
 
-# Setup variables from the environment
-
+logging.info("Setting up environment")
+SIMULATE = env_bool('SIMULATE', '0')
 SSR_PIN = env('SSR_PIN', 'XXX')
 TEMP_POLL_INTERVAL = env_float("TEMP_POLL_INTERVAL", 0.5)
 
@@ -24,14 +24,13 @@ PID_OUTPUT_LIMIT = (0, 20) if COMPONENT_MODE == 'heat' else (-20, 0)
 HASS_ID = env("HASS_ID", "hass_thermostat_" + COMPONENT_MODE)
 HASS_NAME = env("HASS_NAME", "Brew Boiler" if COMPONENT_MODE == 'heat' else "Brew Cooler")
 HASS_UPDATE_INTERVAL = env_float("HASS_UPDATE_INTERVAL", 2)
-HASS_HOST = env("HASS_HOST", "hassio.local")
+MQTT_HOST = env("MQTT_HOST", "hassio.local")
 
-# Setup HASS connection
-
+logging.info("Connecting to MQTT")
 hass = build_component(
     HASS_ID,
     'climate',
-    HASS_HOST
+    MQTT_HOST
 )
 
 TOPIC_STATE = hass.get_topic('state')
@@ -58,12 +57,21 @@ CONFIG = {
     'modes': ['off', COMPONENT_MODE]
 }
 
-# Setup controller components
+if SIMULATE:
+    logging.info("Initializing simulation")
+    fake = FakeThermostat()
+    ssr = fake.ssr
+    thermometer = fake.thermometer
+else:
 
-thermometer = get_thermometer()
-fake = FakeThermostat()  # TODO: Switch to the real deal
-ssr = fake.ssr
+    logging.info("Initializing thermometer")
+    thermometer = get_thermometer()
 
+    logging.info("Initializing SSR")
+    fake = FakeThermostat()  # TODO: Switch to the real deal
+    ssr = fake.ssr
+
+logging.info("Initializing PID")
 component = Component()
 component.mode = "off"
 component.kill = False
@@ -87,6 +95,7 @@ def kill_controller():
     return component.kill
 
 
+logging.info("Creating controller")
 controller = create_controller(
     component.pid,
     component.ssr,
@@ -96,8 +105,8 @@ controller = create_controller(
     kill_func=kill_controller
 )
 
+logging.info("Setting up queues")
 
-# Setup queues
 
 @hass.send(TOPIC_STATE)
 def send_update():
@@ -125,26 +134,27 @@ def set_target(new_tmp):
     send_update()
 
 
-# Start component
+logging.info("Connect to HASS")
+hass.connect(CONFIG)
 
-if __name__ == "__main__":
-    hass.connect(CONFIG)
+time.sleep(1)
 
-    time.sleep(1)
+send_available(True)
 
-    send_available(True)
-
-    stop_update_thread = call_repeatedly(HASS_UPDATE_INTERVAL, send_update)
+stop_update_thread = call_repeatedly(HASS_UPDATE_INTERVAL, send_update)
 
 
-    def exit_gracefully(signum, frame):
-        logging.info("Killing everything")
-        stop_update_thread()
-        hass.disconnect()
-        component.kill = True
+def exit_gracefully(signum, frame):
+    logging.info("Stopping HASS update thread")
+    stop_update_thread()
+    logging.info("Sending HASS diconnect message")
+    hass.disconnect()
+    logging.info("Stopping controller")
+    component.kill = True
 
 
-    signal.signal(signal.SIGINT, exit_gracefully)
-    signal.signal(signal.SIGTERM, exit_gracefully)
+signal.signal(signal.SIGINT, exit_gracefully)
+signal.signal(signal.SIGTERM, exit_gracefully)
 
-    controller()
+logging.info("Starting controller")
+controller()
