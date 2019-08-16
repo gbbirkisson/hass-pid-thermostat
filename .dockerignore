@@ -96,3 +96,5 @@ venv/
 */*.swp
 */*/*.swp
 */*/*/*.swp
+
+docs

@@ -1,6 +1,8 @@
 <h1>hass-pid-thermostat</h1>
 
-A PID (climate) controller for [Home Assistant](https://www.home-assistant.io/) to heat/cool something using a thermometer and a SSR relay.
+A PID (climate) controller for [Home Assistant](https://www.home-assistant.io/) to heat/cool something using a thermometer and a SSR relay. Here is an example of a card that shows up in Home Assistant:
+
+![Card](docs/hass_card.jpg)
 
 ## Table of Contents
 
@@ -10,6 +12,9 @@ A PID (climate) controller for [Home Assistant](https://www.home-assistant.io/) 
   - [Deploy with Balena.io](#deploy-with-balenaio)
 - [Configuration](#configuration)
 - [Electrical Components](#electrical-components)
+  - [Parts I used](#parts-i-used)
+  - [Wiring](#wiring)
+  - [End result](#end-result)
 
 ## Setup
 
@@ -49,4 +54,19 @@ mqtt:
 
 ## Electrical Components
 
-TODO...
+> **_VERY IMPORTANT NOTE:_**  THIS IS NOT A HOW-TO instructional guide. This explains how I used a Raspberry Pi to control electric current. However, I am NOT an electrician, and just because I did something doesn’t mean YOU should, particularly if you are unfamiliar with how to wire electrical devices safely. If you choose to follow the method I used, you do so at your own risk.
+
+### Parts I used
+
+* [Raspberry PI model B](https://www.google.com/search?q=Raspberry+PI+Model+B)
+* [Kudom 40 A Solid State Relay](https://www.google.com/search?q=Kudom+40+A+Solid+State+Relay)
+* [DS18b20 temperature sensor](https://www.google.com/search?q=ds18b20+temperature+sensor)
+* [4.7k ohm resistor](https://www.google.com/search?q=4.7k+ohm+resistor)
+
+### Wiring
+
+![Wiring1](docs/wiring1.jpg)
+
+### End result
+
+![Wiring2](docs/wiring2.jpg)
