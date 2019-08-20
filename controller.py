@@ -2,21 +2,14 @@ import logging
 import time
 
 
-def temperatures(thermometer, kill_func):
-    while not kill_func():
+def temperatures(thermometer):
+    while True:
         current_temperature = thermometer()
         logging.debug("Current temperature is {0:.2f}".format(current_temperature))
         yield current_temperature
 
 
-def ssr_delta_time(pid, current_temperature, enabled_func):
-    if not enabled_func():
-        logging.debug("System is disabled, relay will not be turned on")
-        return 0
-    if pid.setpoint > 99:
-        logging.debug("Temperature target is higher than 99°c, relay turned on manually for boil")
-        return 1
-
+def ssr_delta_time(pid, current_temperature):
     control = pid(current_temperature)
 
     assert pid.output_limits[0] is not None and pid.output_limits[1] is not None, "PID output limits must be set"
@@ -35,26 +28,21 @@ def ssr_delta_time(pid, current_temperature, enabled_func):
     return control_percent
 
 
-def ssr_state(pid, thermometer, enabled_func, kill_func):
+def ssr_state(pid, thermometer):
     last_time = 0
     ssr_turn_off_time = None
-    for current_temperature in temperatures(thermometer, kill_func):
+    for current_temperature in temperatures(thermometer):
         now = time.monotonic()
         dt = now - last_time if now - last_time else 1e-16
-        if dt > pid.sample_time:  # New controller cycle
-            ssr_turn_off_time = now + (ssr_delta_time(pid, current_temperature, enabled_func) * pid.sample_time)
+        if ssr_turn_off_time is None or dt > pid.sample_time:  # New controller cycle
+            ssr_dt = ssr_delta_time(pid, current_temperature)
+            if ssr_dt > 0:  # SSR time bigger than 0
+                ssr_turn_off_time = now + (ssr_dt * pid.sample_time)
             last_time = now
-        yield now < ssr_turn_off_time
+        yield current_temperature, now <= ssr_turn_off_time
 
 
-def control_ssr(pid, ssr, thermometer, enabled_func, delay_func, kill_func):
-    for on_off in ssr_state(pid, thermometer, enabled_func, kill_func):
+def control_ssr(pid, ssr, thermometer):
+    for current_temperature, on_off in ssr_state(pid, thermometer):
         ssr(on_off)
-        delay_func()
-
-
-def create_controller(pid, ssr, thermometer, enabled_func=lambda: True, delay_func=lambda: 0, kill_func=lambda: False):
-    def controller():
-        control_ssr(pid, ssr, thermometer, enabled_func, delay_func, kill_func)
-
-    return controller
+        yield current_temperature, on_off

@@ -1,14 +1,28 @@
 import logging
 import time
 
-from simple_pid import PID
+from matplotlib import pyplot as plt
 
-from controller import create_controller
+from controller import control_ssr
+
+seconds = 1.00
+
+
+def sec():
+    global seconds
+    seconds += 0.01
+    return seconds
+
+
+time.monotonic = sec
+
+# Import after time spoof
+from simple_pid import PID
 
 water_specific_heat = 4184  # 4184 watts will heat a 1L of water up by 1°C every second
 room_temperature = 18
-liters = 5
-boiler_watts = 4184
+liters = 30
+boiler_watts = 3000
 
 
 class FakeThermostat:
@@ -52,33 +66,59 @@ class FakeThermostat:
 
 def create_simulator(pid, invert):
     thermostat = FakeThermostat(invert=invert)
-    return create_controller(pid, thermostat.ssr, thermostat.thermometer, delay_func=lambda: time.sleep(0.3))
+    return control_ssr(pid, thermostat.ssr, thermostat.thermometer)
 
 
-def heater_simulator():
+def heater_simulator(tg):
     return create_simulator(PID(
-        2,
-        0.01,
-        0.2,
-        setpoint=30,
+        1,
+        0.5,
+        0.05,
+        setpoint=tg,
         sample_time=8,
-        output_limits=(0, 20)
+        output_limits=(0, 10)
     ), False)
 
 
-def cooler_simulator():
+def cooler_simulator(tg):
     return create_simulator(PID(
-        2,
-        0.01,
-        0.2,
-        setpoint=4,
-        sample_time=8,
-        output_limits=(-20, 0)
+        1,
+        0.5,
+        0.05,
+        setpoint=tg,
+        sample_time=60,
+        output_limits=(-10, 0)
     ), True)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    sim = heater_simulator()
-    # sim = cooler_simulator()
-    sim()
+    target = 45
+    sim = heater_simulator(target)
+    # target = 14
+    # sim = cooler_simulator(target)
+    x = []
+    y = []
+    t = []
+    on = []
+    for temp, on_off in sim:
+        x.append(seconds / 60)
+        y.append(temp)
+        t.append(target)
+        on.append(1 if on_off else 0)
+        seconds += 1
+        if seconds > 1000 + (60 * 45):
+            break
+
+    fig, ax1 = plt.subplots()
+    ax1.plot(x, y)
+    ax1.plot(x, t)
+    ax1.set_xlabel('minutes')
+    ax1.set_ylabel('°C', color='b')
+    ax1.legend(['Actual', 'Target'])
+
+    # ax2 = ax1.twinx()
+    # ax2.plot(x, on, 'r.')
+    # ax2.set_ylabel('on/off', color='r')
+    fig.tight_layout()
+    fig.savefig('simulation.png', bbox_inches='tight')
