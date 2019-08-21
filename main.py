@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 MQTT_HOST = env('MQTT_HOST', 'hassio.local')
 SIMULATE = env_bool('SIMULATE', '0')
 
-if env_bool('SIMULATE', '0'):
+if SIMULATE:
     logging.info('Initializing simulation devices')
     fake = FakeThermostat()
     ssr = fake.ssr

@@ -24,7 +24,7 @@ else:
     PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
 
 COMPONENT_ID = env('HASS_ID', 'hass_thermostat_' + COMPONENT_MODE)
-COMPONENT_NAME = env('HASS_NAME', 'Brew Heater' if COMPONENT_MODE == 'heat' else 'Brew Cooler')
+COMPONENT_NAME = env('HASS_NAME', 'Brew Boiler' if COMPONENT_MODE == 'heat' else 'Brew Cooler')
 
 
 def get_hass(mqtt_host):
