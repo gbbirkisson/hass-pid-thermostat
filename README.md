@@ -41,10 +41,10 @@ mqtt:
 
 | Environmental variable | Required | Default                     | Description                                                                                                                       |
 | ---------------------- | -------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| COMPONENT_ID           | no       | hostname                    | Id for component in hass.io                                                                                                       |
 | COMPONENT_MODE         | no       | heat                        | Mode of the component, it can be in `heat` mode hooked up to a heating element or `cool` mode when hooked up to a cooling element |
+| COMPONENT_NAME         | no       | Brew (Heaterer/Cooler)      | Name that show up in the hass.io UI                                                                                               |
 | SSR_PIN                | no       | GPIO18                      | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the SSR is connected to      |
-| HASS_ID                | no       | hass_thermostat_(heat/cool) | Id for component in hass.io                                                                                                       |
-| HASS_NAME              | no       | Brew (Boiler/Cooler)        | Name that show up in the hass.io UI                                                                                               |
 | MQTT_HOST              | no       | hassio.local                | The host of the MQTT server to communicate with hass.io                                                                           |
 | PID_P_GAIN             | no       | 1.0                         | PID proportional gain                                                                                                             |
 | PID_I_GAIN             | no       | 0.5                         | PID integral gain                                                                                                                 |

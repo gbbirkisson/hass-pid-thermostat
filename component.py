@@ -23,8 +23,9 @@ else:
     PID_D_GAIN = env_float('PID_D_GAIN', 0.05)
     PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
 
-COMPONENT_ID = env('HASS_ID', 'hass_thermostat_' + COMPONENT_MODE)
-COMPONENT_NAME = env('HASS_NAME', 'Brew Boiler' if COMPONENT_MODE == 'heat' else 'Brew Cooler')
+DEVICE_ID = env('BALENA_DEVICE_NAME_AT_INIT', env('HOSTNAME', 'brew-' + COMPONENT_MODE + 'er'))
+COMPONENT_ID = env('COMPONENT_ID', DEVICE_ID)
+COMPONENT_NAME = env('COMPONENT_NAME', DEVICE_ID.replace('-', ' ').title())
 
 
 def get_hass(mqtt_host):
