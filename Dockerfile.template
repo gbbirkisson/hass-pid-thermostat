@@ -9,4 +9,4 @@ COPY . ./
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
 ENV UDEV=1
 
-CMD ["sh", "-c", "modprobe w1-gpio && modprobe w1-therm && python -u component.py"]
+CMD ["sh", "-c", "modprobe w1-gpio && modprobe w1-therm && python -u main.py"]

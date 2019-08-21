@@ -1,20 +1,24 @@
 import logging
 
+from hass.mqtt import Mqtt
 
-class Hass:
-    _mqtt_client = None
-    _mqtt_topic_prefix = None
+
+class Hass(Mqtt):
 
     def __init__(
             self,
-            mqtt_client,
+            mqtt_host=None,
             object_id=None,
             component=None,
             discovery_prefix='homeassistant',
             node_id=None,
     ):
+        super(Hass, self).__init__(mqtt_host, object_id)
+
         assert object_id is not None, "object id cannot be None"
         assert component is not None, "component cannot be None"
+
+        self._config = None
 
         self._mqtt_topic_prefix = '{}/{}/{}/'.format(
             discovery_prefix,
@@ -22,33 +26,14 @@ class Hass:
             '{}/{}'.format(node_id, object_id) if node_id else object_id
         )
 
-        self._mqtt_client = mqtt_client
+    def set_config(self, config):
+        logging.info('Sending config to hass')
+        self.publish(self.get_topic('config'), config)
 
     def get_topic(self, name):
         return self._mqtt_topic_prefix + name
 
-    def connect(self, config):
-        assert config is not None, "config cannot be None"
-        logging.info('Connecting to hass')
-        self._mqtt_client.publish(self.get_topic('config'), config)
-
-    def disconnect(self):
-        logging.info('Exiting, removing component from hass')
-        self._mqtt_client.publish(self.get_topic('config'), None)
-        self._mqtt_client.disconnect()
-
-    def send(self, topic):
-        def real_decorator(func):
-            def wrapper(*args, **kwargs):
-                self._mqtt_client.publish(topic, func(*args, **kwargs))
-
-            return wrapper
-
-        return real_decorator
-
-    def receive(self, topic):
-        def real_decorator(func):
-            self._mqtt_client.subscribe(topic, func)
-            return func
-
-        return real_decorator
+    def __exit__(self, *args):
+        logging.info('Removing component from hass')
+        self.publish(self.get_topic('config'), None)
+        super(Hass, self).__exit__(args)

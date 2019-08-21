@@ -1,160 +1,141 @@
 import logging
-import signal
-import time
 
 from simple_pid import PID
 
-from controller import create_controller
-from hass.utils import build_component
-from simulation.simulators import FakeThermostat
-from ssr import get_ssr
-from thermometer import get_thermometer
-from utils import env, Component, env_float, call_repeatedly, env_bool
-
-logging.basicConfig(level=logging.DEBUG)
-
-logging.info("Setting up environment")
-SIMULATE = env_bool('SIMULATE', '0')
-SSR_PIN = env('SSR_PIN', 'GPIO18')
-TEMP_POLL_INTERVAL = env_float("TEMP_POLL_INTERVAL", 0.5)
+from controller import control_ssr
+from hass.hass import Hass
+from utils import env, env_float
 
 COMPONENT_MODE = env('COMPONENT_MODE', 'heat')
-assert COMPONENT_MODE == 'heat' or COMPONENT_MODE == 'cool', "COMPONENT_MODE env var has to be 'heat' or 'cool'"
-PID_OUTPUT_LIMIT = (0, 20) if COMPONENT_MODE == 'heat' else (-20, 0)
+assert COMPONENT_MODE == 'heat' or COMPONENT_MODE == 'cool', 'COMPONENT_MODE env var has to be "heat" or "cool"'
 
-HASS_ID = env("HASS_ID", "hass_thermostat_" + COMPONENT_MODE)
-HASS_NAME = env("HASS_NAME", "Brew Boiler" if COMPONENT_MODE == 'heat' else "Brew Cooler")
-HASS_UPDATE_INTERVAL = env_float("HASS_UPDATE_INTERVAL", 2)
-MQTT_HOST = env("MQTT_HOST", "hassio.local")
-
-logging.info("Connecting to MQTT")
-hass = build_component(
-    HASS_ID,
-    'climate',
-    MQTT_HOST
-)
-
-TOPIC_STATE = hass.get_topic('state')
-TOPIC_AVAIL = hass.get_topic('available')
-TOPIC_CMD_MODE = hass.get_topic('thermostatModeCmd')
-TOPIC_CMD_TEMP = hass.get_topic('targetTempCmd')
-
-CONFIG = {
-    'name': HASS_NAME,
-    'mode_cmd_t': TOPIC_CMD_MODE,
-    'mode_stat_t': TOPIC_STATE,
-    'mode_stat_tpl': "{{ value_json['mode'] }}",
-    'avty_t': TOPIC_AVAIL,
-    'pl_avail': 'online',
-    'pl_not_avail': 'offline',
-    'temp_cmd_t': TOPIC_CMD_TEMP,
-    'temp_stat_t': TOPIC_STATE,
-    'temp_stat_tpl': "{{ value_json['target_temp'] }}",
-    'curr_temp_t': TOPIC_STATE,
-    'curr_temp_tpl': "{{ value_json['current_temp'] }}",
-    'min_temp': '0',
-    'max_temp': '100',
-    'temp_step': '0.5',
-    'modes': ['off', COMPONENT_MODE]
-}
-
-if SIMULATE:
-    logging.info("Initializing simulation")
-    fake = FakeThermostat()
-    ssr = fake.ssr
-    thermometer = fake.thermometer
+if COMPONENT_MODE == 'heat':
+    PID_OUTPUT_LIMIT = (0, 10)
+    PID_P_GAIN = env_float('PID_P_GAIN', 1)
+    PID_I_GAIN = env_float('PID_I_GAIN', 0.5)
+    PID_D_GAIN = env_float('PID_D_GAIN', 0.05)
+    PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
 else:
+    # TODO: Work out gain with simulation
+    PID_OUTPUT_LIMIT = (-10, 0)
+    PID_P_GAIN = env_float('PID_P_GAIN', 1)
+    PID_I_GAIN = env_float('PID_I_GAIN', 0.5)
+    PID_D_GAIN = env_float('PID_D_GAIN', 0.05)
+    PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
 
-    logging.info("Initializing thermometer")
-    thermometer = get_thermometer()
-
-    logging.info("Initializing SSR")
-    ssr = get_ssr(SSR_PIN)
-
-logging.info("Initializing PID")
-component = Component()
-component.mode = "off"
-component.kill = False
-component.pid = PID(
-    env_float('PID_P_GAIN', 2.5),
-    env_float('PID_I_GAIN', 0.005),
-    env_float('PID_D_GAIN', 0.2),
-    setpoint=0,
-    sample_time=env_float('PID_SAMPLE_TIME', 8),
-    output_limits=PID_OUTPUT_LIMIT
-)
-component.thermometer = thermometer
-component.ssr = ssr
+COMPONENT_ID = env('HASS_ID', 'hass_thermostat_' + COMPONENT_MODE)
+COMPONENT_NAME = env('HASS_NAME', 'Brew Heater' if COMPONENT_MODE == 'heat' else 'Brew Cooler')
 
 
-def controller_enabled():
-    return component.mode != 'off'
+def get_hass(mqtt_host):
+    return Hass(
+        mqtt_host=mqtt_host,
+        object_id=COMPONENT_ID,
+        component='climate'
+    )
 
 
-def kill_controller():
-    return component.kill
+class Component:
 
+    def __init__(self, hass, thermometer, ssr):
+        self._thermometer = thermometer
+        self._ssr = ssr
 
-logging.info("Creating controller")
-controller = create_controller(
-    component.pid,
-    component.ssr,
-    component.thermometer,
-    enabled_func=controller_enabled,
-    delay_func=lambda: time.sleep(TEMP_POLL_INTERVAL),
-    kill_func=kill_controller
-)
+        self._mode = 'off'
+        self._target_temp = thermometer()
+        self._available = False
+        self._controller = None
 
-logging.info("Setting up queues")
+        self._TOPIC_STATE = hass.get_topic('state')
+        self._TOPIC_AVAIL = hass.get_topic('available')
+        self._TOPIC_CMD_MODE = hass.get_topic('thermostatModeCmd')
+        self._TOPIC_CMD_TEMP = hass.get_topic('targetTempCmd')
 
+        self._hass = hass
+        self._hass.subscribe(self._TOPIC_CMD_MODE, lambda new_mode: self._set_mode(new_mode))
+        self._hass.subscribe(self._TOPIC_CMD_TEMP, lambda new_temp: self._set_target_temp(new_temp))
 
-@hass.send(TOPIC_STATE)
-def send_update():
-    return {
-        "mode": component.mode,
-        "target_temp": component.pid.setpoint,
-        "current_temp": component.thermometer(),
-    }
+    def __enter__(self):
+        self._hass.set_config({
+            'name': COMPONENT_NAME,
+            'mode_cmd_t': self._TOPIC_CMD_MODE,
+            'mode_stat_t': self._TOPIC_STATE,
+            'mode_stat_tpl': "{{ value_json['mode'] }}",
+            'avty_t': self._TOPIC_AVAIL,
+            'pl_avail': 'online',
+            'pl_not_avail': 'offline',
+            'temp_cmd_t': self._TOPIC_CMD_TEMP,
+            'temp_stat_t': self._TOPIC_STATE,
+            'temp_stat_tpl': "{{ value_json['target_temp'] }}",
+            'curr_temp_t': self._TOPIC_STATE,
+            'curr_temp_tpl': "{{ value_json['current_temp'] }}",
+            'min_temp': '0',
+            'max_temp': '100',
+            'temp_step': '1',
+            'modes': ['off', COMPONENT_MODE]
+        })
+        return self
 
+    def __exit__(self, *args):
+        pass
 
-@hass.send(TOPIC_AVAIL)
-def send_available(is_available):
-    return "online" if is_available else "offline"
+    def _set_mode(self, new_mode):
+        if self._mode != new_mode:
+            self._mode = new_mode
+            self._delete_controller()
+            self.send_state()
 
+    def _set_target_temp(self, new_temp):
+        new_temp = float(new_temp)
+        if abs(self._target_temp - new_temp) > 1e-16:
+            self._target_temp = new_temp
+            self._delete_controller()
+            self.send_state()
 
-@hass.receive(TOPIC_CMD_MODE)
-def set_mode(new_mode):
-    component.mode = new_mode
-    send_update()
+    @property
+    def available(self):
+        return self._available
 
+    @available.setter
+    def available(self, new_available):
+        self._available = new_available
+        self._hass.publish(self._TOPIC_AVAIL, 'online' if self._available else 'offline')
 
-@hass.receive(TOPIC_CMD_TEMP)
-def set_target(new_tmp):
-    component.pid.setpoint = float(new_tmp)
-    send_update()
+    def send_state(self):
+        self._hass.publish(self._TOPIC_STATE, {
+            'mode': self._mode,
+            'target_temp': self._target_temp,
+            'current_temp': self._thermometer(),
+        })
 
+    def _delete_controller(self):
+        logging.debug('Deleting current controller')
+        self._controller = None
 
-logging.info("Connect to HASS")
-hass.connect(CONFIG)
+    def _create_controller(self):
+        logging.debug('Creating new controller')
+        self._controller = control_ssr(PID(
+            PID_P_GAIN,
+            PID_I_GAIN,
+            PID_D_GAIN,
+            setpoint=self._target_temp,
+            sample_time=PID_SAMPLE_TIME,
+            output_limits=PID_OUTPUT_LIMIT
+        ), self._ssr, self._thermometer)
 
-time.sleep(1)
+    @property
+    def controller(self):
+        assert self._mode != 'off', 'invalid state, mode cannot be "off"'
 
-send_available(True)
+        if self._controller is None:
+            self._create_controller()
 
-stop_update_thread = call_repeatedly(HASS_UPDATE_INTERVAL, send_update)
+        return self._controller
 
+    @property
+    def mode(self):
+        return self._mode
 
-def exit_gracefully(signum, frame):
-    logging.info("Stopping HASS update thread")
-    stop_update_thread()
-    logging.info("Sending HASS diconnect message")
-    hass.disconnect()
-    logging.info("Stopping controller")
-    component.kill = True
-
-
-signal.signal(signal.SIGINT, exit_gracefully)
-signal.signal(signal.SIGTERM, exit_gracefully)
-
-logging.info("Starting controller")
-controller()
+    @property
+    def target_temp(self):
+        return self._target_temp

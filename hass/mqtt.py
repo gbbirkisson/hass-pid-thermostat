@@ -1,36 +1,27 @@
 import json
 import logging
 
-from paho.mqtt.client import Client as MqttClient
+from paho.mqtt.client import Client as Client
 
 
-class Mqtt:
+class Mqtt():
     _mqtt_client = None
-    _mqtt_topic_prefix = None
     _mqtt_subs = {}
 
-    def __init__(
-            self,
-            id,
-            host
-    ):
-        assert id is not None, "id cannot be none"
+    def __init__(self, host, client_id=None):
+        assert host is not None, 'host id cannot be None'
 
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.INFO)
+        self._host = host
 
-        self._mqtt_client = MqttClient(id)
-        self._mqtt_client.enable_logger(logger)
-        self._mqtt_client.connect(host)
+        self._mqtt_client = Client(client_id)
         self._mqtt_client.on_message = self._on_message
-        self._mqtt_client.loop_start()
 
-    def publish(self, topic, message):
-        if type(message) is dict:
-            message = json.dumps(message)
-        message = message if message is not None else ""
-        logging.debug('MQTT msg sent on topic {}: {}'.format(topic, message))
-        self._mqtt_client.publish(topic, message)
+    def _on_message(self, client, userdata, message):
+        payload = str(message.payload.decode("utf-8"))
+        logging.debug('MQTT msg received on topic {}: {}'.format(message.topic, payload))
+        sub_functions = self._mqtt_subs.get(message.topic, [])
+        for func in sub_functions:
+            func(payload)
 
     def subscribe(self, topic, func):
         logging.info('MQTT subscribing to {}'.format(topic))
@@ -40,13 +31,36 @@ class Mqtt:
         sub_functions.append(func)
         self._mqtt_subs[topic] = sub_functions
 
-    def _on_message(self, client, userdata, message):
-        payload = str(message.payload.decode("utf-8"))
-        logging.debug('MQTT msg received on topic {}: {}'.format(message.topic, payload))
-        sub_functions = self._mqtt_subs.get(message.topic, [])
-        for func in sub_functions:
-            func(payload)
+    def publish(self, topic, message):
+        if type(message) is dict:
+            message = json.dumps(message)
+        message = message if message is not None else ""
+        logging.debug('MQTT msg sent on topic {}: {}'.format(topic, message))
+        self._mqtt_client.publish(topic, message)
 
-    def disconnect(self):
+    def receive(self, topic):
+        def real_decorator(func):
+            self._mqtt_client.subscribe(topic, func)
+            return func
+
+        return real_decorator
+
+    def send(self, topic):
+        def real_decorator(func):
+            def wrapper(*args, **kwargs):
+                self._mqtt_client.publish(topic, func(*args, **kwargs))
+
+            return wrapper
+
+        return real_decorator
+
+    def __enter__(self):
+        logging.info('Connecting to MQTT host {}'.format(self._host))
+        self._mqtt_client.connect(self._host)
+        self._mqtt_client.loop_start()
+        return self
+
+    def __exit__(self, *args):
+        logging.info('Disconnecting from MQTT host {}'.format(self._host))
         self._mqtt_client.loop_stop()
         self._mqtt_client.disconnect()

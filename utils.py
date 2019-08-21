@@ -1,5 +1,4 @@
 import os
-from threading import Event, Thread
 
 
 class Component:
@@ -22,14 +21,3 @@ def env_bool(key, default=None):
     if r is None:
         default
     return r.lower() in ['1', 'true', 'yes', 'y']
-
-
-def call_repeatedly(interval, func, *args):
-    stopped = Event()
-
-    def loop():
-        while not stopped.wait(interval):
-            func(*args)
-
-    Thread(target=loop).start()
-    return stopped.set
