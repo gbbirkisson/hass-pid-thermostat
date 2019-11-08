@@ -2,9 +2,10 @@ import logging
 import time
 
 water_specific_heat = 4184  # 4184 watts will heat a 1L of water up by 1°C every second
-room_temperature = 18
-liters = 30
-boiler_watts = 3000
+room_temperature = 9
+liters = 20
+boiler_watts = 2500
+minutes_down_one_degree = 10
 
 
 class FakeThermostat:
@@ -34,7 +35,7 @@ class FakeThermostat:
             self._current_temperature = self._current_temperature + temperature_gain
             self._current_temperature = min(self._current_temperature, 100)
         else:
-            temperature_loss = 1 / 60 * dt  # 60 sec to lose 1°c .... maybe use exponential decay ??
+            temperature_loss = (1 / (60 * minutes_down_one_degree)) * dt
             temperature_loss = temperature_loss * self._invert_constant
             if self._invert_constant < 0:
                 clamp = min

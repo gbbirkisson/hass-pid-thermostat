@@ -28,9 +28,9 @@ def create_simulator(pid, invert):
 
 def heater_simulator(tg):
     return create_simulator(PID(
+        5,
+        0,
         1,
-        0.5,
-        0.05,
         setpoint=tg,
         sample_time=8,
         output_limits=(0, 10)
@@ -39,9 +39,9 @@ def heater_simulator(tg):
 
 def cooler_simulator(tg):
     return create_simulator(PID(
+        5,
+        0,
         1,
-        0.5,
-        0.05,
         setpoint=tg,
         sample_time=60,
         output_limits=(-10, 0)
@@ -50,7 +50,7 @@ def cooler_simulator(tg):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    target = 45
+    target = 60
     sim = heater_simulator(target)
     # target = 14
     # sim = cooler_simulator(target)
@@ -66,6 +66,8 @@ if __name__ == '__main__':
         seconds += 1
         if seconds > 1000 + (60 * 45):
             break
+
+    logging.basicConfig(level=logging.ERROR)
 
     fig, ax1 = plt.subplots()
     ax1.plot(x, y)
