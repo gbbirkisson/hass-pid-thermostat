@@ -11,16 +11,16 @@ assert COMPONENT_MODE == 'heat' or COMPONENT_MODE == 'cool', 'COMPONENT_MODE env
 
 if COMPONENT_MODE == 'heat':
     PID_OUTPUT_LIMIT = (0, 10)
-    PID_P_GAIN = env_float('PID_P_GAIN', 5)
+    PID_P_GAIN = env_float('PID_P_GAIN', 2)
     PID_I_GAIN = env_float('PID_I_GAIN', 0)
-    PID_D_GAIN = env_float('PID_D_GAIN', 1)
+    PID_D_GAIN = env_float('PID_D_GAIN', 5)
     PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
 else:
     # TODO: Work out gain with simulation
     PID_OUTPUT_LIMIT = (-10, 0)
-    PID_P_GAIN = env_float('PID_P_GAIN', 5)
+    PID_P_GAIN = env_float('PID_P_GAIN', 2)
     PID_I_GAIN = env_float('PID_I_GAIN', 0)
-    PID_D_GAIN = env_float('PID_D_GAIN', 1)
+    PID_D_GAIN = env_float('PID_D_GAIN', 5)
     PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
 
 DEVICE_ID = env('BALENA_DEVICE_NAME_AT_INIT', env('HOSTNAME', 'brew-' + COMPONENT_MODE + 'er'))
