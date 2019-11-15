@@ -10,7 +10,15 @@ from hass.mqtt import Mqtt
 from simulation.thermostat import FakeThermostat
 from utils import env_bool, env
 
-logging.basicConfig(level=logging.INFO)
+
+LOG_LEVEL = env('LOG_LEVEL', 'info').lower()
+LOG_LEVEL_DICT = {
+    'debug': logging.DEBUG,
+    'info': logging.INFO,
+    'warn': logging.WARN,
+    'error': logging.ERROR
+}
+logging.basicConfig(level=LOG_LEVEL_DICT.get(LOG_LEVEL, logging.INFO))
 
 MQTT_HOST = env('MQTT_HOST', 'hassio.local')
 MQTT_USER = env('MQTT_USER')

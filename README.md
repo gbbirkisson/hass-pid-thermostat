@@ -41,6 +41,7 @@ mqtt:
 
 | Environmental variable | Required | Default                     | Description                                                                                                                       |
 | ---------------------- | -------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| LOG_LEVEL              | no       | info                        | Log level for application, i.e debug, info, warn, error                                                                           |
 | COMPONENT_ID           | no       | hostname                    | Id for component in hass.io                                                                                                       |
 | COMPONENT_MODE         | no       | heat                        | Mode of the component, it can be in `heat` mode hooked up to a heating element or `cool` mode when hooked up to a cooling element |
 | COMPONENT_NAME         | no       | Brew (Heaterer/Cooler)      | Name that show up in the hass.io UI                                                                                               |
