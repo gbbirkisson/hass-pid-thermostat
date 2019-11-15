@@ -28,9 +28,11 @@ COMPONENT_ID = env('COMPONENT_ID', DEVICE_ID)
 COMPONENT_NAME = env('COMPONENT_NAME', DEVICE_ID.replace('-', ' ').title())
 
 
-def get_hass(mqtt_host):
+def get_hass(mqtt_host, mqtt_username, mqtt_password):
     return Hass(
         mqtt_host=mqtt_host,
+        mqtt_username=mqtt_username,
+        mqtt_password=mqtt_password,
         object_id=COMPONENT_ID,
         component='climate'
     )

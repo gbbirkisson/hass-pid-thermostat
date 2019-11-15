@@ -8,12 +8,15 @@ class Hass(Mqtt):
     def __init__(
             self,
             mqtt_host=None,
+            mqtt_username=None,
+            mqtt_password=None,
             object_id=None,
             component=None,
             discovery_prefix='homeassistant',
             node_id=None,
     ):
-        super(Hass, self).__init__(mqtt_host, object_id)
+        super(Hass, self).__init__(mqtt_host=mqtt_host, mqtt_username=mqtt_username, mqtt_password=mqtt_password,
+                                   client_id=object_id)
 
         assert object_id is not None, "object id cannot be None"
         assert component is not None, "component cannot be None"

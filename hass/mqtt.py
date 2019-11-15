@@ -8,13 +8,24 @@ class Mqtt():
     _mqtt_client = None
     _mqtt_subs = {}
 
-    def __init__(self, host, client_id=None):
-        assert host is not None, 'host id cannot be None'
+    def __init__(self, mqtt_host=None, mqtt_username=None, mqtt_password=None, client_id=None):
+        assert mqtt_host is not None, 'host id cannot be None'
 
-        self._host = host
+        self._host = mqtt_host
 
         self._mqtt_client = Client(client_id)
+
+        if mqtt_username is not None and mqtt_password is not None:
+            logging.info('MQTT connecting with user and pass')
+            self._mqtt_client.username_pw_set(mqtt_username, mqtt_password)
+
         self._mqtt_client.on_message = self._on_message
+        self._mqtt_client.on_connect = self._on_connect
+
+    def _on_connect(self, client, userdata, flags, rc):
+        if rc != 0:
+            logging.error('MQTT failed to connect to {}: {}'.format(self._host, rc))
+            raise SystemExit
 
     def _on_message(self, client, userdata, message):
         payload = str(message.payload.decode("utf-8"))

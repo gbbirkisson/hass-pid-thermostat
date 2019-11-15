@@ -12,6 +12,8 @@ from utils import env_bool, env
 logging.basicConfig(level=logging.INFO)
 
 MQTT_HOST = env('MQTT_HOST', 'hassio.local')
+MQTT_USER = env('MQTT_USER')
+MQTT_PASS = env('MQTT_PASS')
 SIMULATE = env_bool('SIMULATE', '0')
 
 if SIMULATE:
@@ -41,7 +43,7 @@ atexit.register(kill)
 
 send_update = True
 
-with get_hass(MQTT_HOST) as hass:
+with get_hass(MQTT_HOST, MQTT_USER, MQTT_PASS) as hass:
     with Component(hass, thermometer, ssr) as component:
         time.sleep(1)
         component.available = True

@@ -46,6 +46,8 @@ mqtt:
 | COMPONENT_NAME         | no       | Brew (Heaterer/Cooler)      | Name that show up in the hass.io UI                                                                                               |
 | SSR_PIN                | no       | GPIO18                      | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the SSR is connected to      |
 | MQTT_HOST              | no       | hassio.local                | The host of the MQTT server to communicate with hass.io                                                                           |
+| MQTT_USER              | no       |                             | MQTT user                                                                                                                         |
+| MQTT_PASS              | no       |                             | MQTT pass                                                                                                                         |
 | PID_P_GAIN             | no       | 1.0                         | PID proportional gain                                                                                                             |
 | PID_I_GAIN             | no       | 0.5                         | PID integral gain                                                                                                                 |
 | PID_D_GAIN             | no       | 0.05                        | PID derivative gain                                                                                                               |
