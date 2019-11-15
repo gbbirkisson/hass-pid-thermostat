@@ -31,14 +31,14 @@ class Hass():
     def publish(self, topic, message):
         self._mqtt.publish(topic, message)
 
-    def set_config(self, config):
-        logging.info('HASS adding component {}.{}'.format(self._component, self._object_id))
-        self._mqtt.publish(self.get_topic('config'), config)
-
     def get_topic(self, name):
         return self._mqtt_topic_prefix + name
 
     def __enter__(self):
+        if self._config is None:
+            raise SystemExit
+        logging.info('HASS adding component {}.{}'.format(self._component, self._object_id))
+        self._mqtt.publish(self.get_topic('config'), self._config)
         return self
 
     def __exit__(self, *args):

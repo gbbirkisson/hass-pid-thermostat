@@ -18,10 +18,9 @@ class FakeThermostat:
         self._current_temperature = room_temperature
         self._last_call = None
 
-    def switch(self, on):
-        if self._switch.is_on() != on:
-            logging.debug('FakeSwitch set {}'.format('ON' if on else 'OFF'))
-            self._switch(on)
+    @property
+    def switch(self):
+        return self._switch
 
     def thermometer(self):
         now = time.monotonic()

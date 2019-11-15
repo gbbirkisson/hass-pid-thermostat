@@ -47,11 +47,7 @@ class Hvac(Hass):
         self._TOPIC_CMD_MODE = self.get_topic('thermostatModeCmd')
         self._TOPIC_CMD_TEMP = self.get_topic('targetTempCmd')
 
-        self.subscribe(self._TOPIC_CMD_MODE, lambda new_mode: self._set_mode(new_mode))
-        self.subscribe(self._TOPIC_CMD_TEMP, lambda new_temp: self._set_target_temp(new_temp))
-
-    def __enter__(self):
-        self.set_config({
+        self._config = {
             'name': COMPONENT_NAME,
             'mode_command_topic': self._TOPIC_CMD_MODE,
             'mode_state_topic': self._TOPIC_STATE,
@@ -68,8 +64,10 @@ class Hvac(Hass):
             'max_temp': '100',
             'temp_step': '1',
             'modes': ['off', COMPONENT_MODE]
-        })
-        return self
+        }
+
+        self.subscribe(self._TOPIC_CMD_MODE, lambda new_mode: self._set_mode(new_mode))
+        self.subscribe(self._TOPIC_CMD_TEMP, lambda new_temp: self._set_target_temp(new_temp))
 
     def _set_mode(self, new_mode):
         if self._mode != new_mode:

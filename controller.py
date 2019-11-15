@@ -16,6 +16,7 @@ def switch_delta_time(pid, current_temperature, sensors):
     control_percent = abs(control) / (pid.output_limits[1] - pid.output_limits[0])
 
     assert 0 <= control_percent <= 1, 'PID control_percent has to be between 0 and 1'
+    control_percent_human = control_percent * 100
     logging.info(
         'PID:\n\tcurrent   {:.2f}\n\tsetpoint  {:.2f}\n\tcomponent {}\n\ttunings   {}\n\tlimits    {}\n\tcontrol   {:.2f} ({:.2f}%)'.format(
             current_temperature,
@@ -24,9 +25,9 @@ def switch_delta_time(pid, current_temperature, sensors):
             pid.tunings,
             pid.output_limits,
             control,
-            control_percent * 100
+            control_percent_human
         ))
-    sensors(pid.components, pid.tunings, pid.output_limits, pid.sample_time, control_percent)
+    sensors(pid.components, pid.tunings, pid.output_limits, pid.sample_time, control_percent_human)
     return control_percent
 
 

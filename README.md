@@ -61,61 +61,57 @@ mqtt:
 
 You can paste this view into Home Assistant to setup the dashboard.
 
-```bash
+```yaml
 views:
-  - title: Beer Making
+  - icon: 'mdi:glass-mug-variant'
     path: beer-making
-    icon: 'mdi:glass-mug-variant'
+    title: Beer Making
     cards:
-      - type: entity-button
-        tap_action:
-          action: toggle
-        hold_action:
-          action: more-info
-        show_icon: true
-        show_name: true
-        entity: switch.boiler_pump
-        icon_height: 50px
       - entity: climate.boiler
         type: thermostat
-      - type: vertical-stack
-        cards:
-          - type: history-graph
-            entities:
+      - type: entities
+        entities:
+          - entity: switch.boiler_pump
+          - entity: switch.boiler_heater
+          - entity: sensor.boiler_pid_time_on
+      - cards:
+          - entities:
               - entity: climate.boiler
             hours_to_show: 1
             refresh_interval: 5
-          - type: history-graph
-            entities:
+            type: history-graph
+          - entities:
               - entity: sensor.boiler_pid_p
               - entity: sensor.boiler_pid_i
               - entity: sensor.boiler_pid_d
             hours_to_show: 1
             refresh_interval: 5
-      - type: horizontal-stack
-        title: PID Gain
-        cards:
-          - type: sensor
-            entity: sensor.boiler_pid_p_gain
+            type: history-graph
+        type: vertical-stack
+      - cards:
+          - entity: sensor.boiler_pid_p_gain
             name: P
-          - type: sensor
-            entity: sensor.boiler_pid_i_gain
+            type: sensor
+          - entity: sensor.boiler_pid_i_gain
             name: I
-          - type: sensor
-            entity: sensor.boiler_pid_d_gain
+            type: sensor
+          - entity: sensor.boiler_pid_d_gain
             name: D
-      - type: horizontal-stack
-        title: PID Params
-        cards:
-          - type: sensor
-            entity: sensor.boiler_pid_time_interval
+            type: sensor
+        title: PID Gain
+        type: horizontal-stack
+      - cards:
+          - entity: sensor.boiler_pid_time_interval
             name: Interval
-          - type: sensor
-            entity: sensor.boiler_pid_output_lower
+            type: sensor
+          - entity: sensor.boiler_pid_output_lower
             name: Lower
-          - type: sensor
-            entity: sensor.boiler_pid_output_upper
+            type: sensor
+          - entity: sensor.boiler_pid_output_upper
             name: Upper
+            type: sensor
+        title: PID Params
+        type: horizontal-stack
 ```
 
 ## Electrical Components

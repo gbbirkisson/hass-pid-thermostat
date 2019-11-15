@@ -7,10 +7,10 @@ from devices.switch import get_switch
 from devices.thermometer import get_thermometer
 from hass.mqtt import Mqtt
 from hvac import hvac
-from pump import pump
 from sensor import sensors
 from simulation.switch import fake_switch
 from simulation.thermostat import FakeThermostat
+from switch import switch
 from utils import env_bool, env
 
 LOG_LEVEL = env('LOG_LEVEL', 'info').lower()
@@ -59,10 +59,11 @@ atexit.register(kill)
 send_update = True
 
 with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS) as mqtt:
-    with sensors(mqtt) as sensors:
-        with hvac(mqtt, thermometer, pid_switch, sensors) as hvac, pump(mqtt, pump_switch) as pump:
+    with sensors(mqtt) as sensors, switch(mqtt, pid_switch, 'heater') as heater_switch:
+        with hvac(mqtt, thermometer, heater_switch, sensors) as hvac, switch(mqtt, pump_switch, 'pump') as pump:
             time.sleep(1)
 
+            heater_switch.available = True
             pump.available = True
             hvac.available = True
             sensors.available = True
@@ -70,13 +71,13 @@ with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS)
             logging.info("Running ...")
             while RUN:
                 if hvac.mode == 'off':
-                    pid_switch(False)
+                    heater_switch(False)
                 elif hvac.mode == 'heat' and hvac.target_temp > 99.0:
                     logging.debug('Temperature target is higher than 99°c on a heater, relay permanently turned on')
-                    pid_switch(True)
+                    heater_switch(True)
                 elif hvac.mode == 'cool' and hvac.target_temp < 1.0:
                     logging.debug('Temperature target is higher lower than 1°c on a cool, relay permanently turned on')
-                    pid_switch(True)
+                    heater_switch(True)
                 else:
                     hvac.controller.__next__()
 

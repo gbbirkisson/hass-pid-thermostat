@@ -93,17 +93,14 @@ class _Sensor(Hass):
 
         self._TOPIC_AVAIL = self.get_topic('available')
         self._TOPIC_STATE = self.get_topic('state')
-
-    def __enter__(self):
-        self.set_config({
+        self._config = {
             'name': self._component_name,
             'state_topic': self._TOPIC_STATE,
             'availability_topic': self._TOPIC_AVAIL,
             'payload_available': 'online',
             'payload_not_available': 'offline',
             'unit_of_measurement': self._unit_of_measurement
-        })
-        return self
+        }
 
     @property
     def available(self):
