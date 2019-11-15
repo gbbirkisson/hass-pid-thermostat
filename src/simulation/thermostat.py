@@ -1,4 +1,3 @@
-import logging
 import time
 
 from simulation.switch import fake_switch
