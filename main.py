@@ -3,13 +3,14 @@ import logging
 import signal
 import time
 
-from hvac import Hvac, hvac
-from devices.ssr import get_ssr
+from devices.switch import get_switch
 from devices.thermometer import get_thermometer
 from hass.mqtt import Mqtt
+from hvac import hvac
+from pump import pump
+from simulation.switch import fake_switch
 from simulation.thermostat import FakeThermostat
 from utils import env_bool, env
-
 
 LOG_LEVEL = env('LOG_LEVEL', 'info').lower()
 LOG_LEVEL_DICT = {
@@ -28,14 +29,18 @@ SIMULATE = env_bool('SIMULATE', '0')
 if SIMULATE:
     logging.info('Initializing simulation devices')
     fake = FakeThermostat()
-    ssr = fake.ssr
+    pid_switch = fake.switch
+    pump_switch = fake_switch('pump')
     thermometer = fake.thermometer
 else:
     logging.info('Initializing thermometer')
     thermometer = get_thermometer()
 
-    logging.info('Initializing SSR')
-    ssr = get_ssr()
+    logging.info('Initializing PID relay')
+    pid_switch = get_switch(env('BOIL_ELEMENT_PIN', 'GPIO18'))
+
+    logging.info('Initializing Pump relay')
+    pump_switch = get_switch(env('PUMP_ELEMENT_PIN', 'GPIO24'))
 
 RUN = True
 
@@ -54,25 +59,28 @@ send_update = True
 
 with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS) as mqtt:
     time.sleep(1)
-    with hvac(mqtt, thermometer, ssr) as component:
-        time.sleep(1)
-        component.available = True
-        logging.info("Running ...")
-        while RUN:
-            if component.mode == 'off':
-                logging.debug('System is disabled, relay will not be turned on')
-                ssr(False)
-            elif component.mode == 'heat' and component.target_temp > 99.0:
-                logging.debug('Temperature target is higher than 99°c on a heater, relay permanently turned on')
-                ssr(True)
-            elif component.mode == 'cool' and component.target_temp < 1.0:
-                logging.debug('Temperature target is higher lower than 1°c on a cool, relay permanently turned on')
-                ssr(True)
-            else:
-                component.controller.__next__()
-
-            if send_update:
-                component.send_state()
-
-            send_update = not send_update
+    with pump(mqtt, pump_switch) as pump:
+        with hvac(mqtt, thermometer, pid_switch) as hvac:
             time.sleep(1)
+
+            pump.available = True
+            hvac.available = True
+
+            logging.info("Running ...")
+            while RUN:
+                if hvac.mode == 'off':
+                    pid_switch(False)
+                elif hvac.mode == 'heat' and hvac.target_temp > 99.0:
+                    logging.debug('Temperature target is higher than 99°c on a heater, relay permanently turned on')
+                    pid_switch(True)
+                elif hvac.mode == 'cool' and hvac.target_temp < 1.0:
+                    logging.debug('Temperature target is higher lower than 1°c on a cool, relay permanently turned on')
+                    pid_switch(True)
+                else:
+                    hvac.controller.__next__()
+
+                if send_update:
+                    hvac.send_state()
+
+                send_update = not send_update
+                time.sleep(1)

@@ -2,9 +2,9 @@ import logging
 
 from simple_pid import PID
 
-from controller import control_ssr
+from controller import control_switch
 from hass.hass import Hass
-from utils import env, env_float
+from utils import env, env_float, device_and_component_info
 
 COMPONENT_MODE = env('COMPONENT_MODE', 'heat')
 assert COMPONENT_MODE == 'heat' or COMPONENT_MODE == 'cool', 'COMPONENT_MODE env var has to be "heat" or "cool"'
@@ -22,21 +22,19 @@ else:
     PID_D_GAIN = env_float('PID_D_GAIN', 5)
     PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
 
-DEVICE_ID = env('BALENA_DEVICE_NAME_AT_INIT', env('HOSTNAME', 'brew_' + COMPONENT_MODE + 'er'))
-COMPONENT_ID = env('COMPONENT_ID', DEVICE_ID)
-COMPONENT_NAME = env('COMPONENT_NAME', DEVICE_ID.replace('_', ' ').title())
+COMPONENT_ID, COMPONENT_NAME = device_and_component_info()
 
 
-def hvac(mqtt, thermometer, ssr):
-    return Hvac(mqtt, thermometer, ssr)
+def hvac(mqtt, thermometer, switch):
+    return Hvac(mqtt, thermometer, switch)
 
 
 class Hvac(Hass):
-    def __init__(self, mqtt, thermometer, ssr):
+    def __init__(self, mqtt, thermometer, switch):
         super().__init__(mqtt=mqtt, object_id=COMPONENT_ID, component='climate')
 
         self._thermometer = thermometer
-        self._ssr = ssr
+        self._switch = switch
 
         self._mode = 'off'
         self._target_temp = thermometer()
@@ -107,14 +105,14 @@ class Hvac(Hass):
 
     def _create_controller(self):
         logging.debug('Creating new controller')
-        self._controller = control_ssr(PID(
+        self._controller = control_switch(PID(
             PID_P_GAIN,
             PID_I_GAIN,
             PID_D_GAIN,
             setpoint=self._target_temp,
             sample_time=PID_SAMPLE_TIME,
             output_limits=PID_OUTPUT_LIMIT
-        ), self._ssr, self._thermometer)
+        ), self._switch, self._thermometer)
 
     @property
     def controller(self):

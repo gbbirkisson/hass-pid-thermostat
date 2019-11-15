@@ -9,7 +9,7 @@ def temperatures(thermometer):
         yield current_temperature
 
 
-def ssr_delta_time(pid, current_temperature):
+def switch_delta_time(pid, current_temperature):
     control = pid(current_temperature)
 
     assert pid.output_limits[0] is not None and pid.output_limits[1] is not None, 'PID output limits must be set'
@@ -29,21 +29,21 @@ def ssr_delta_time(pid, current_temperature):
     return control_percent
 
 
-def ssr_state(pid, thermometer):
+def switch_states(pid, thermometer):
     last_time = 0
-    ssr_turn_off_time = None
+    switch_turn_off_time = None
     for current_temperature in temperatures(thermometer):
         now = time.monotonic()
         dt = now - last_time if now - last_time else 1e-16
         if dt > pid.sample_time:  # New controller cycle
-            ssr_dt = ssr_delta_time(pid, current_temperature)
-            if ssr_dt > 0:  # SSR time bigger than 0
-                ssr_turn_off_time = now + (ssr_dt * pid.sample_time)
+            switch_dt = switch_delta_time(pid, current_temperature)
+            if switch_dt > 0:  # Switch time bigger than 0
+                switch_turn_off_time = now + (switch_dt * pid.sample_time)
             last_time = now
-        yield current_temperature, now <= ssr_turn_off_time if ssr_turn_off_time else False
+        yield current_temperature, now <= switch_turn_off_time if switch_turn_off_time else False
 
 
-def control_ssr(pid, ssr, thermometer):
-    for current_temperature, on_off in ssr_state(pid, thermometer):
-        ssr(on_off)
+def control_switch(pid, switch, thermometer):
+    for current_temperature, on_off in switch_states(pid, thermometer):
+        switch(on_off)
         yield current_temperature, on_off

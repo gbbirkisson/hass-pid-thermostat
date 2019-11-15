@@ -42,18 +42,19 @@ mqtt:
 | Environmental variable | Required | Default                     | Description                                                                                                                       |
 | ---------------------- | -------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | LOG_LEVEL              | no       | info                        | Log level for application, i.e debug, info, warn, error                                                                           |
-| COMPONENT_ID           | no       | hostname                    | Id for component in hass.io                                                                                                       |
+| COMPONENT_ID           | no       | boiler                      | Id for component in hass.io                                                                                                       |
 | COMPONENT_MODE         | no       | heat                        | Mode of the component, it can be in `heat` mode hooked up to a heating element or `cool` mode when hooked up to a cooling element |
-| COMPONENT_NAME         | no       | Brew (Heaterer/Cooler)      | Name that show up in the hass.io UI                                                                                               |
-| SSR_PIN                | no       | GPIO18                      | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the SSR is connected to      |
+| COMPONENT_NAME         | no       | Boiler                      | Name that show up in the hass.io UI                                                                                               |
+| BOIL_ELEMENT_PIN       | no       | GPIO18                      | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the heater is connected to   |
+| PUMP_ELEMENT_PIN       | no       | GPIO24                      | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the pump is connected to     |
 | MQTT_HOST              | no       | hassio.local                | The host of the MQTT server to communicate with hass.io                                                                           |
 | MQTT_USER              | no       |                             | MQTT user                                                                                                                         |
 | MQTT_PASS              | no       |                             | MQTT pass                                                                                                                         |
-| PID_P_GAIN             | no       | 1.0                         | PID proportional gain                                                                                                             |
-| PID_I_GAIN             | no       | 0.5                         | PID integral gain                                                                                                                 |
-| PID_D_GAIN             | no       | 0.05                        | PID derivative gain                                                                                                               |
-| PID_SAMPLE_TIME        | no       | 8                           | Amount of time between each PID update                                                                                            |
-| SIMULATE               | no       | false                       | Set this to true if you want to simulate thermometer and ssr                                                                      |
+| PID_P_GAIN             | no       | 5                           | PID proportional gain                                                                                                             |
+| PID_I_GAIN             | no       | 0                           | PID integral gain                                                                                                                 |
+| PID_D_GAIN             | no       | 2                           | PID derivative gain                                                                                                               |
+| PID_SAMPLE_TIME        | no       | 10                          | Amount of time between each PID update                                                                                            |
+| SIMULATE               | no       | false                       | Set this to true if you want to simulate thermometer and relays                                                                   |
 
 ## Electrical Components
 

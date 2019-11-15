@@ -2,17 +2,12 @@ import logging
 
 from gpiozero import LED
 
-from utils import env
 
-SSR_PIN = env('SSR_PIN', 'GPIO18')
-
-
-class _SSR:
-
-    def __init__(self):
+class _Switch:
+    def __init__(self, pin):
         self._on = False
-        logging.info('SSR will use GPIO pin "{}"'.format(SSR_PIN))
-        self._led = LED(SSR_PIN)
+        logging.info('SSR will use GPIO pin "{}"'.format(pin))
+        self._led = LED(pin)
 
     def __call__(self, on):
         if self._on != on:
@@ -20,6 +15,9 @@ class _SSR:
             self._on = on
             self._led.value = on
 
+    def is_on(self):
+        return self._on
 
-def get_ssr():
-    return _SSR()
+
+def get_switch(pin):
+    return _Switch(pin)
