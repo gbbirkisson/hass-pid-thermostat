@@ -16,31 +16,25 @@ if COMPONENT_MODE == 'heat':
     PID_D_GAIN = env_float('PID_D_GAIN', 5)
     PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
 else:
-    # TODO: Work out gain with simulation
     PID_OUTPUT_LIMIT = (-10, 0)
     PID_P_GAIN = env_float('PID_P_GAIN', 2)
     PID_I_GAIN = env_float('PID_I_GAIN', 0)
     PID_D_GAIN = env_float('PID_D_GAIN', 5)
     PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
 
-DEVICE_ID = env('BALENA_DEVICE_NAME_AT_INIT', env('HOSTNAME', 'brew-' + COMPONENT_MODE + 'er'))
+DEVICE_ID = env('BALENA_DEVICE_NAME_AT_INIT', env('HOSTNAME', 'brew_' + COMPONENT_MODE + 'er'))
 COMPONENT_ID = env('COMPONENT_ID', DEVICE_ID)
-COMPONENT_NAME = env('COMPONENT_NAME', DEVICE_ID.replace('-', ' ').title())
+COMPONENT_NAME = env('COMPONENT_NAME', DEVICE_ID.replace('_', ' ').title())
 
 
-def get_hass(mqtt_host, mqtt_username, mqtt_password):
-    return Hass(
-        mqtt_host=mqtt_host,
-        mqtt_username=mqtt_username,
-        mqtt_password=mqtt_password,
-        object_id=COMPONENT_ID,
-        component='climate'
-    )
+def hvac(mqtt, thermometer, ssr):
+    return Hvac(mqtt, thermometer, ssr)
 
 
-class Component:
+class Hvac(Hass):
+    def __init__(self, mqtt, thermometer, ssr):
+        super().__init__(mqtt=mqtt, object_id=COMPONENT_ID, component='climate')
 
-    def __init__(self, hass, thermometer, ssr):
         self._thermometer = thermometer
         self._ssr = ssr
 
@@ -49,38 +43,34 @@ class Component:
         self._available = False
         self._controller = None
 
-        self._TOPIC_STATE = hass.get_topic('state')
-        self._TOPIC_AVAIL = hass.get_topic('available')
-        self._TOPIC_CMD_MODE = hass.get_topic('thermostatModeCmd')
-        self._TOPIC_CMD_TEMP = hass.get_topic('targetTempCmd')
+        self._TOPIC_STATE = self.get_topic('state')
+        self._TOPIC_AVAIL = self.get_topic('available')
+        self._TOPIC_CMD_MODE = self.get_topic('thermostatModeCmd')
+        self._TOPIC_CMD_TEMP = self.get_topic('targetTempCmd')
 
-        self._hass = hass
-        self._hass.subscribe(self._TOPIC_CMD_MODE, lambda new_mode: self._set_mode(new_mode))
-        self._hass.subscribe(self._TOPIC_CMD_TEMP, lambda new_temp: self._set_target_temp(new_temp))
+        self.subscribe(self._TOPIC_CMD_MODE, lambda new_mode: self._set_mode(new_mode))
+        self.subscribe(self._TOPIC_CMD_TEMP, lambda new_temp: self._set_target_temp(new_temp))
 
     def __enter__(self):
-        self._hass.set_config({
+        self.set_config({
             'name': COMPONENT_NAME,
-            'mode_cmd_t': self._TOPIC_CMD_MODE,
-            'mode_stat_t': self._TOPIC_STATE,
-            'mode_stat_tpl': "{{ value_json['mode'] }}",
-            'avty_t': self._TOPIC_AVAIL,
-            'pl_avail': 'online',
-            'pl_not_avail': 'offline',
-            'temp_cmd_t': self._TOPIC_CMD_TEMP,
-            'temp_stat_t': self._TOPIC_STATE,
-            'temp_stat_tpl': "{{ value_json['target_temp'] }}",
-            'curr_temp_t': self._TOPIC_STATE,
-            'curr_temp_tpl': "{{ value_json['current_temp'] }}",
+            'mode_command_topic': self._TOPIC_CMD_MODE,
+            'mode_state_topic': self._TOPIC_STATE,
+            'mode_state_template': "{{ value_json['mode'] }}",
+            'availability_topic': self._TOPIC_AVAIL,
+            'payload_available': 'online',
+            'payload_not_available': 'offline',
+            'temperature_command_topic': self._TOPIC_CMD_TEMP,
+            'temperature_state_topic': self._TOPIC_STATE,
+            'temperature_state_template': "{{ value_json['target_temp'] }}",
+            'current_temperature_topic': self._TOPIC_STATE,
+            'current_temperature_template': "{{ value_json['current_temp'] }}",
             'min_temp': '0',
             'max_temp': '100',
             'temp_step': '1',
             'modes': ['off', COMPONENT_MODE]
         })
         return self
-
-    def __exit__(self, *args):
-        pass
 
     def _set_mode(self, new_mode):
         if self._mode != new_mode:
@@ -102,10 +92,10 @@ class Component:
     @available.setter
     def available(self, new_available):
         self._available = new_available
-        self._hass.publish(self._TOPIC_AVAIL, 'online' if self._available else 'offline')
+        self.publish(self._TOPIC_AVAIL, 'online' if self._available else 'offline')
 
     def send_state(self):
-        self._hass.publish(self._TOPIC_STATE, {
+        self.publish(self._TOPIC_STATE, {
             'mode': self._mode,
             'target_temp': self._target_temp,
             'current_temp': self._thermometer(),

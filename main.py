@@ -3,9 +3,10 @@ import logging
 import signal
 import time
 
-from component import Component, get_hass
+from hvac import Hvac, hvac
 from devices.ssr import get_ssr
 from devices.thermometer import get_thermometer
+from hass.mqtt import Mqtt
 from simulation.thermostat import FakeThermostat
 from utils import env_bool, env
 
@@ -43,8 +44,9 @@ atexit.register(kill)
 
 send_update = True
 
-with get_hass(MQTT_HOST, MQTT_USER, MQTT_PASS) as hass:
-    with Component(hass, thermometer, ssr) as component:
+with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS) as mqtt:
+    time.sleep(1)
+    with hvac(mqtt, thermometer, ssr) as component:
         time.sleep(1)
         component.available = True
         logging.info("Running ...")
