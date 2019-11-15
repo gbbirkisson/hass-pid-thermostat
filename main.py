@@ -8,6 +8,7 @@ from devices.thermometer import get_thermometer
 from hass.mqtt import Mqtt
 from hvac import hvac
 from pump import pump
+from sensor import sensors
 from simulation.switch import fake_switch
 from simulation.thermostat import FakeThermostat
 from utils import env_bool, env
@@ -58,13 +59,13 @@ atexit.register(kill)
 send_update = True
 
 with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS) as mqtt:
-    time.sleep(1)
-    with pump(mqtt, pump_switch) as pump:
-        with hvac(mqtt, thermometer, pid_switch) as hvac:
+    with sensors(mqtt) as sensors:
+        with hvac(mqtt, thermometer, pid_switch, sensors) as hvac, pump(mqtt, pump_switch) as pump:
             time.sleep(1)
 
             pump.available = True
             hvac.available = True
+            sensors.available = True
 
             logging.info("Running ...")
             while RUN:

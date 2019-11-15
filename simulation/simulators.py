@@ -21,9 +21,13 @@ time.monotonic = sec
 from simple_pid import PID
 
 
+def sim_stats(*args):
+    pass
+
+
 def create_simulator(pid, invert):
     thermostat = FakeThermostat(invert=invert)
-    return control_switch(pid, thermostat.switch, thermostat.thermometer)
+    return control_switch(pid, thermostat.switch, thermostat.thermometer, sim_stats)
 
 
 def heater_simulator(tg):

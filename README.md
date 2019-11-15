@@ -11,6 +11,7 @@ A PID (climate) controller for [Home Assistant](https://www.home-assistant.io/) 
   - [Home Assistant](#home-assistant)
   - [Deploy with Balena.io](#deploy-with-balenaio)
 - [Configuration](#configuration)
+- [Home Assistant Dashboard](#home-assistant-dashboard)
 - [Electrical Components](#electrical-components)
   - [Parts I used](#parts-i-used)
   - [Wiring](#wiring)
@@ -39,22 +40,83 @@ mqtt:
 
 ## Configuration
 
-| Environmental variable | Required | Default                     | Description                                                                                                                       |
-| ---------------------- | -------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| LOG_LEVEL              | no       | info                        | Log level for application, i.e debug, info, warn, error                                                                           |
-| COMPONENT_ID           | no       | boiler                      | Id for component in hass.io                                                                                                       |
-| COMPONENT_MODE         | no       | heat                        | Mode of the component, it can be in `heat` mode hooked up to a heating element or `cool` mode when hooked up to a cooling element |
-| COMPONENT_NAME         | no       | Boiler                      | Name that show up in the hass.io UI                                                                                               |
-| BOIL_ELEMENT_PIN       | no       | GPIO18                      | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the heater is connected to   |
-| PUMP_ELEMENT_PIN       | no       | GPIO24                      | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the pump is connected to     |
-| MQTT_HOST              | no       | hassio.local                | The host of the MQTT server to communicate with hass.io                                                                           |
-| MQTT_USER              | no       |                             | MQTT user                                                                                                                         |
-| MQTT_PASS              | no       |                             | MQTT pass                                                                                                                         |
-| PID_P_GAIN             | no       | 5                           | PID proportional gain                                                                                                             |
-| PID_I_GAIN             | no       | 0                           | PID integral gain                                                                                                                 |
-| PID_D_GAIN             | no       | 2                           | PID derivative gain                                                                                                               |
-| PID_SAMPLE_TIME        | no       | 10                          | Amount of time between each PID update                                                                                            |
-| SIMULATE               | no       | false                       | Set this to true if you want to simulate thermometer and relays                                                                   |
+| Environmental variable | Required | Default      | Description                                                                                                                       |
+| ---------------------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| LOG_LEVEL              | no       | info         | Log level for application, i.e debug, info, warn, error                                                                           |
+| COMPONENT_ID           | no       | boiler       | Id for component in hass.io                                                                                                       |
+| COMPONENT_MODE         | no       | heat         | Mode of the component, it can be in `heat` mode hooked up to a heating element or `cool` mode when hooked up to a cooling element |
+| COMPONENT_NAME         | no       | Boiler       | Name that show up in the hass.io UI                                                                                               |
+| BOIL_ELEMENT_PIN       | no       | GPIO18       | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the heater is connected to   |
+| PUMP_ELEMENT_PIN       | no       | GPIO24       | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the pump is connected to     |
+| MQTT_HOST              | no       | hassio.local | The host of the MQTT server to communicate with hass.io                                                                           |
+| MQTT_USER              | no       |              | MQTT user                                                                                                                         |
+| MQTT_PASS              | no       |              | MQTT pass                                                                                                                         |
+| PID_P_GAIN             | no       | 5            | PID proportional gain                                                                                                             |
+| PID_I_GAIN             | no       | 0            | PID integral gain                                                                                                                 |
+| PID_D_GAIN             | no       | 2            | PID derivative gain                                                                                                               |
+| PID_SAMPLE_TIME        | no       | 8            | Amount of time between each PID update                                                                                            |
+| SIMULATE               | no       | false        | Set this to true if you want to simulate thermometer and relays                                                                   |
+
+## Home Assistant Dashboard
+
+You can paste this view into Home Assistant to setup the dashboard.
+
+```bash
+views:
+  - title: Beer Making
+    path: beer-making
+    icon: 'mdi:glass-mug-variant'
+    cards:
+      - type: entity-button
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        show_icon: true
+        show_name: true
+        entity: switch.boiler_pump
+        icon_height: 50px
+      - entity: climate.boiler
+        type: thermostat
+      - type: vertical-stack
+        cards:
+          - type: history-graph
+            entities:
+              - entity: climate.boiler
+            hours_to_show: 1
+            refresh_interval: 5
+          - type: history-graph
+            entities:
+              - entity: sensor.boiler_pid_p
+              - entity: sensor.boiler_pid_i
+              - entity: sensor.boiler_pid_d
+            hours_to_show: 1
+            refresh_interval: 5
+      - type: horizontal-stack
+        title: PID Gain
+        cards:
+          - type: sensor
+            entity: sensor.boiler_pid_p_gain
+            name: P
+          - type: sensor
+            entity: sensor.boiler_pid_i_gain
+            name: I
+          - type: sensor
+            entity: sensor.boiler_pid_d_gain
+            name: D
+      - type: horizontal-stack
+        title: PID Params
+        cards:
+          - type: sensor
+            entity: sensor.boiler_pid_time_interval
+            name: Interval
+          - type: sensor
+            entity: sensor.boiler_pid_output_lower
+            name: Lower
+          - type: sensor
+            entity: sensor.boiler_pid_output_upper
+            name: Upper
+```
 
 ## Electrical Components
 

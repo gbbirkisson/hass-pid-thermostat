@@ -25,16 +25,17 @@ else:
 COMPONENT_ID, COMPONENT_NAME = device_and_component_info()
 
 
-def hvac(mqtt, thermometer, switch):
-    return Hvac(mqtt, thermometer, switch)
+def hvac(mqtt, thermometer, switch, sensors):
+    return Hvac(mqtt, thermometer, switch, sensors)
 
 
 class Hvac(Hass):
-    def __init__(self, mqtt, thermometer, switch):
+    def __init__(self, mqtt, thermometer, switch, sensors):
         super().__init__(mqtt=mqtt, object_id=COMPONENT_ID, component='climate')
 
         self._thermometer = thermometer
         self._switch = switch
+        self._sensors = sensors
 
         self._mode = 'off'
         self._target_temp = thermometer()
@@ -112,7 +113,7 @@ class Hvac(Hass):
             setpoint=self._target_temp,
             sample_time=PID_SAMPLE_TIME,
             output_limits=PID_OUTPUT_LIMIT
-        ), self._switch, self._thermometer)
+        ), self._switch, self._thermometer, self._sensors)
 
     @property
     def controller(self):
