@@ -15,14 +15,16 @@ pid_output_upper = 'pid_output_upper'
 pid_time_interval = 'pid_time_interval'
 pid_time_on = 'pid_time_on'
 
+therm_name = lambda sensor: 'thermometer_{}'.format(sensor.get_id().lower())
 
-def sensors(mqtt):
-    return _StatsSensors(mqtt)
-
+def sensors(mqtt, th):
+    return _StatsSensors(mqtt, th)
 
 class _StatsSensors():
-    def __init__(self, mqtt):
+    def __init__(self, mqtt, th):
         self._available = True
+        self._thermometers = th
+
         self._sensors = {
             pid_p: _Sensor(mqtt, pid_p, ' '),
             pid_i: _Sensor(mqtt, pid_i, ' '),
@@ -38,6 +40,9 @@ class _StatsSensors():
             pid_time_interval: _Sensor(mqtt, pid_time_interval, 'seconds'),
             pid_time_on: _Sensor(mqtt, pid_time_on, '%'),
         }
+
+        for s in self._thermometers.sensors():
+            self._sensors[therm_name(s)] = _Sensor(mqtt, therm_name(s), '°C')
 
     def __call__(self, components, weights, output_limits, interval, control_percentage):
         p_p, p_i, p_d = components
@@ -56,7 +61,11 @@ class _StatsSensors():
         self._send_state(pid_output_upper, high)
 
         self._send_state(pid_time_interval, interval)
-        self._send_state(pid_time_on, control_percentage)
+        self._send_state(pid_time_on, '%.0f' % control_percentage)
+
+    def send_state(self):
+        for s in self._thermometers.sensors():
+            self._send_state(therm_name(s), s.get_temperature())
 
     def _send_state(self, sensor, state):
         s = self._sensors.get(sensor)

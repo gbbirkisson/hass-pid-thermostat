@@ -3,15 +3,29 @@ import logging
 from ds18b20 import DS18B20
 
 
-def get_thermometer():
-    logging.debug('Getting the temperature sensor')
+def get_thermometers():
+    return _Thermometers()
 
-    sensors_ids = DS18B20.get_available_sensors()
 
-    if len(sensors_ids) != 1:
-        raise Exception('One and only one sensor should be detected, found {}'.format(sensors_ids))
-    sensor = DS18B20(sensors_ids[0])
+class _Thermometers:
+    def __init__(self):
+        logging.debug('Getting the temperature sensor')
 
-    logging.info('Using temperature sensor "{}"'.format(sensor.get_id()))
+        sensors_ids = DS18B20.get_available_sensors()
 
-    return sensor.get_temperature
+        if len(sensors_ids) == 0:
+            raise Exception('No temp sensor detected')
+
+        self._sensors = []
+        for id in sensors_ids:
+            logging.debug('Adding sensor {}'.format(id))
+            self._sensors.append(DS18B20(id))
+
+    def __call__(self):
+        res = 0.0
+        for t in self._sensors:
+            res = res + t.get_temperature()
+        return res / len(self._sensors)
+
+    def sensors(self):
+        return self._sensors

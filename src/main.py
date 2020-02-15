@@ -4,7 +4,7 @@ import signal
 import time
 
 from devices.switch import get_switch
-from devices.thermometer import get_thermometer
+from devices.thermometer import get_thermometers
 from hass.mqtt import Mqtt
 from hvac import hvac
 from sensor import sensors
@@ -32,10 +32,10 @@ if SIMULATE:
     fake = FakeThermostat()
     pid_switch = fake.switch
     pump_switch = fake_switch('pump')
-    thermometer = fake.thermometer
+    thermometers = fake.thermometers()
 else:
     logging.info('Initializing thermometer')
-    thermometer = get_thermometer()
+    thermometers = get_thermometers()
 
     logging.info('Initializing PID relay')
     pid_switch = get_switch(env('BOIL_ELEMENT_PIN', 'GPIO18'))
@@ -59,8 +59,8 @@ atexit.register(kill)
 send_update = True
 
 with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS) as mqtt:
-    with sensors(mqtt) as sensors, switch(mqtt, pid_switch, 'heater') as heater_switch:
-        with hvac(mqtt, thermometer, heater_switch, sensors) as hvac, switch(mqtt, pump_switch, 'pump') as pump:
+    with sensors(mqtt, thermometers) as sensors, switch(mqtt, pid_switch, 'heater') as heater_switch:
+        with hvac(mqtt, thermometers, heater_switch, sensors) as hvac, switch(mqtt, pump_switch, 'pump') as pump:
             time.sleep(1)
 
             heater_switch.available = True
@@ -83,6 +83,7 @@ with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS)
 
                 if send_update:
                     hvac.send_state()
+                    sensors.send_state()
 
                 send_update = not send_update
                 time.sleep(1)

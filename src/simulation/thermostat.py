@@ -1,4 +1,5 @@
 import time
+from random import randint
 
 from simulation.switch import fake_switch
 
@@ -12,16 +13,29 @@ minutes_down_one_degree = 10
 class FakeThermostat:
 
     def __init__(self, invert=False):
-        self._invert_constant = -1 if invert else 1
         self._switch = fake_switch('heater')
-        self._current_temperature = room_temperature
-        self._last_call = None
+        self._thermometeres = FakeThermometers(invert, self._switch)
 
     @property
     def switch(self):
         return self._switch
 
-    def thermometer(self):
+    def thermometers(self):
+        return self._thermometeres
+
+
+class FakeThermometers:
+    def __init__(self, invert, switch):
+        self._invert_constant = -1 if invert else 1
+        self._current_temperature = room_temperature
+        self._switch = switch
+        self._last_call = None
+        self._sensors = [
+            _FakeSensor('sens1'),
+            _FakeSensor('sens2'),
+        ]
+
+    def __call__(self):
         now = time.monotonic()
         if self._last_call is None:
             self._last_call = now
@@ -45,3 +59,17 @@ class FakeThermostat:
 
         self._last_call = now
         return self._current_temperature
+
+    def sensors(self):
+        return self._sensors
+
+
+class _FakeSensor:
+    def __init__(self, i):
+        self._id = i
+
+    def get_id(self):
+        return self._id
+
+    def get_temperature(self):
+        return randint(0, 100)

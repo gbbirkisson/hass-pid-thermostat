@@ -27,7 +27,7 @@ def sim_stats(*args):
 
 def create_simulator(pid, invert):
     thermostat = FakeThermostat(invert=invert)
-    return control_switch(pid, thermostat.switch, thermostat.thermometer, sim_stats)
+    return control_switch(pid, thermostat.switch, thermostat.thermometers(), sim_stats)
 
 
 def heater_simulator(tg):
