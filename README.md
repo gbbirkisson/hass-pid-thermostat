@@ -31,8 +31,8 @@ mqtt:
 
 ### Deploy with Balena.io
 
-* Edit the `config.txt` in balena-boot partition of the SD card and append the following lines:
-    * `dtoverlay=w1-gpio`
+* Add a custom fleet configuration variable in project:
+    * `BALENA_HOST_CONFIG_dtoverlay=w1-gpio`
 * Add remote your balena remote:
     * `git remote add balena <USERNAME>@git.balena-cloud.com:<USERNAME>/<APPNAME>.git`
 * Push to balena:
