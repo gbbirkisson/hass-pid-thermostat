@@ -21,7 +21,7 @@ A PID (climate) controller for [Home Assistant](https://www.home-assistant.io/) 
 
 ### Home Assistant
 
-Enable mqtt discovery by adding to HASS config:
+Enable mqtt discovery by adding to HASS `configuration.yaml`:
 
 ```yaml
 mqtt:
@@ -71,12 +71,19 @@ views:
         type: thermostat
       - type: entities
         entities:
+          - entity: sensor.boiler_thermometer_01144e89cbaa
+          - entity: sensor.boiler_thermometer_000008fb871f
+        show_header_toggle: false
+      - entities:
           - entity: switch.boiler_pump
           - entity: switch.boiler_heater
           - entity: sensor.boiler_pid_time_on
+        type: entities
       - cards:
           - entities:
               - entity: climate.boiler
+              - entity: sensor.boiler_thermometer_01144e89cbaa
+              - entity: sensor.boiler_thermometer_000008fb871f
             hours_to_show: 1
             refresh_interval: 5
             type: history-graph
@@ -85,7 +92,7 @@ views:
               - entity: sensor.boiler_pid_i
               - entity: sensor.boiler_pid_d
             hours_to_show: 1
-            refresh_interval: 5
+            refresh_interval: 10
             type: history-graph
         type: vertical-stack
       - cards:
@@ -112,6 +119,17 @@ views:
             type: sensor
         title: PID Params
         type: horizontal-stack
+```
+
+For more friendly names of the thermometers in the dashboard add this to your `configuration.yaml`.
+
+```yaml
+homeassistant:
+  customize:
+    sensor.boiler_thermometer_01144e89cbaa:
+      friendly_name: Boiler Top
+    sensor.boiler_thermometer_000008fb871f:
+      friendly_name: Boiler Buttom
 ```
 
 ## Electrical Components
