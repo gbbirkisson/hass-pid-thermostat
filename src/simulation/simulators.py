@@ -32,7 +32,7 @@ def create_simulator(pid, invert):
 
 def heater_simulator(tg):
     return create_simulator(PID(
-        2,
+        3.5,
         0,
         5,
         setpoint=tg,

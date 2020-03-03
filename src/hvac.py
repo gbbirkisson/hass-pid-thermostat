@@ -11,13 +11,13 @@ assert COMPONENT_MODE == 'heat' or COMPONENT_MODE == 'cool', 'COMPONENT_MODE env
 
 if COMPONENT_MODE == 'heat':
     PID_OUTPUT_LIMIT = (0, 10)
-    PID_P_GAIN = env_float('PID_P_GAIN', 2)
+    PID_P_GAIN = env_float('PID_P_GAIN', 3.5)
     PID_I_GAIN = env_float('PID_I_GAIN', 0)
     PID_D_GAIN = env_float('PID_D_GAIN', 5)
     PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
 else:
     PID_OUTPUT_LIMIT = (-10, 0)
-    PID_P_GAIN = env_float('PID_P_GAIN', 2)
+    PID_P_GAIN = env_float('PID_P_GAIN', 3.5)
     PID_I_GAIN = env_float('PID_I_GAIN', 0)
     PID_D_GAIN = env_float('PID_D_GAIN', 5)
     PID_SAMPLE_TIME = env_float('PID_SAMPLE_TIME', 8)
