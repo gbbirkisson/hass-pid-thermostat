@@ -17,8 +17,10 @@ pid_time_on = 'pid_time_on'
 
 therm_name = lambda sensor: 'thermometer_{}'.format(sensor.get_id().lower())
 
+
 def sensors(mqtt, th):
     return _StatsSensors(mqtt, th)
+
 
 class _StatsSensors():
     def __init__(self, mqtt, th):

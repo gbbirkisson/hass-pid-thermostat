@@ -1,25 +1,61 @@
 import logging
+import sys
 
 from ds18b20 import DS18B20
 
 from hass.components import Sensor, Cover
 
 
+def create_DS18B20_all_thermometers(mqtt, error_sensor=None):
+    sensors_ids = DS18B20.get_available_sensors()
+
+    if len(sensors_ids) == 0:
+        raise Exception('No temp sensor detected')
+
+    return [create_DS18B20_thermometer(mqtt, i, error_sensor) for i in sensors_ids]
+
+
+def create_DS18B20_thermometer(mqtt, DS18B20_id, error_sensor=None):
+    sensor = DS18B20(DS18B20_id)
+    last_value = [sensor.get_temperature()]
+
+    def _read_temp():
+        try:
+            last_value[0] = sensor.get_temperature()
+        except:
+            if error_sensor is not None:
+                error_sensor.register_error(
+                    "Could not read temperature on sensor '{}': {}".format(sensor.get_id(), sys.exc_info()[0]))
+        return last_value[0]
+
+    return Thermometer(mqtt, sensor.get_id(), _read_temp, error_sensor)
+
+
+def create_average_thermometers(mqtt, thermometers):
+    average = AverageThermometer(mqtt, thermometers)
+    w_average = WeightedAverageThermometer(mqtt,
+                                           [(t, ThermometerWeight(mqtt, 'weight_{}'.format(t.get_name()))) for t in
+                                            thermometers])
+    return [average, w_average]
+
+
 class Thermometer(Sensor):
-    def __init__(self, mqtt, id):
-        super().__init__(mqtt, 'temp_' + id.lower(), '°C')
-        self._therm = DS18B20(id)
+    def __init__(self, mqtt, name, read_func):
+        self._name = name.lower()
+        self._therm = read_func
+        super().__init__(mqtt, 'temp_' + self._name, '°C')
 
-    def id_get(self):
-        return self._therm.get_id()
-
+    # noinspection PyBroadException
     def state_get(self):
-        return self._therm.get_temperature()
+        return self._therm()
+
+    def get_name(self):
+        return self._name
 
 
 class ThermometerWeight(Cover):
-    def __init__(self, mqtt, id, position=100):
-        super().__init__(mqtt, id, 0, 200)
+    def __init__(self, mqtt, name, position=5):
+        super().__init__(mqtt, name, 0, 10)
         self._position = position
 
     def position_set(self, value):
@@ -45,9 +81,9 @@ class AverageThermometer(Sensor):
 
 
 class WeightedAverageThermometer(Sensor):
-    def __init__(self, mqtt, thermometers_weights):
+    def __init__(self, mqtt, thermometers_and_weights):
         super().__init__(mqtt, 'temp_average_weighted', '°C')
-        self._thermometers = thermometers_weights
+        self._thermometers = thermometers_and_weights
 
     def state_get(self):
         values = [therm.state_get() for therm, weight in self._thermometers]

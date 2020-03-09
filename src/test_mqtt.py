@@ -78,10 +78,10 @@ class TestCover(Cover):
 
 def create_components(mqtt):
     c = []
-    #c.append(TestSensor(mqtt))
-    #c.append(TestSwitch(mqtt))
-    #c.append(TestClimate(mqtt))
-    #c.append(TestCover(mqtt))
+    # c.append(TestSensor(mqtt))
+    # c.append(TestSwitch(mqtt))
+    # c.append(TestClimate(mqtt))
+    # c.append(TestCover(mqtt))
     return c
 
 
