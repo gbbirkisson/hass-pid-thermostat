@@ -37,14 +37,14 @@ class Manager:
         time.sleep(1)  # Give home assistant a chance to catch up
 
         for component in self._all:
-            component.available = True
+            component.available(True)
 
         for component in self._all:
             component.on_connect()
 
     def __exit__(self, *args):
         for component in self._all:
-            component.__enter__()
+            component.__exit__()
 
 
 class _Base(Hass):
@@ -57,26 +57,21 @@ class _Base(Hass):
         self._TOPIC_AVAIL = self.get_topic('available')
 
         self._config = {
-            'name': cname,
+            'name': cname.title(),
             'availability_topic': self._TOPIC_AVAIL,
             'payload_available': 'online',
             'payload_not_available': 'offline',
         }
 
-    @property
-    def available(self):
-        return self._available
-
-    @available.setter
     def available(self, new_available):
         self._available = new_available
         self.publish(self._TOPIC_AVAIL, 'online' if self._available else 'offline')
 
+    def on_connect(self):
+        self.state_send()
+
     def state_send(self):
         raise NotImplemented
-
-    def on_connect(self):
-        pass
 
 
 class Sensor(_Base):
@@ -90,8 +85,11 @@ class Sensor(_Base):
             'unit_of_measurement': unit_of_measurement,
         })
 
+    def _format_state(self, state):
+        return "{0:.3f}".format(state)
+
     def state_send(self):
-        self.publish(self._TOPIC_STATE, self.state_get())
+        self.publish(self._TOPIC_STATE, self._format_state(self.state_get()))
 
     def state_get(self):
         raise NotImplementedError
@@ -189,7 +187,7 @@ class Climate(_Base):
         raise NotImplementedError
 
     def state_send(self):
-        self.publish(self._TOPIC_STATE_CURRENT, self.current_get())
+        self.publish(self._TOPIC_STATE_CURRENT, "{0:.3f}".format(self.current_get()))
 
     def on_connect(self):
         self.mode_set_and_send('off')

@@ -1,42 +1,25 @@
 import logging
-import sys
 
 from ds18b20 import DS18B20
 
 from hass.components import Sensor, Cover
 
 
-def create_DS18B20_all_thermometers(mqtt, error_sensor=None):
-    sensors_ids = DS18B20.get_available_sensors()
-
-    if len(sensors_ids) == 0:
-        raise Exception('No temp sensor detected')
-
-    return [create_DS18B20_thermometer(mqtt, i, error_sensor) for i in sensors_ids]
+def create_average_thermometer(mqtt, manager, thermometers):
+    t = AverageThermometer(mqtt, thermometers)
+    manager.add(t, send_updates=True)
+    return t
 
 
-def create_DS18B20_thermometer(mqtt, DS18B20_id, error_sensor=None):
-    sensor = DS18B20(DS18B20_id)
-    last_value = [sensor.get_temperature()]
-
-    def _read_temp():
-        try:
-            last_value[0] = sensor.get_temperature()
-        except:
-            if error_sensor is not None:
-                error_sensor.register_error(
-                    "Could not read temperature on sensor '{}': {}".format(sensor.get_id(), sys.exc_info()[0]))
-        return last_value[0]
-
-    return Thermometer(mqtt, sensor.get_id(), _read_temp, error_sensor)
-
-
-def create_average_thermometers(mqtt, thermometers):
-    average = AverageThermometer(mqtt, thermometers)
-    w_average = WeightedAverageThermometer(mqtt,
-                                           [(t, ThermometerWeight(mqtt, 'weight_{}'.format(t.get_name()))) for t in
-                                            thermometers])
-    return [average, w_average]
+def create_weighted_average_thermometer(mqtt, manager, thermometers):
+    pairs = []
+    for thermometer in thermometers:
+        weight = ThermometerWeight(mqtt, 'weight_{}'.format(thermometer.get_name()))
+        manager.add(weight, send_updates=False)
+        pairs.append((thermometer, weight))
+    t = WeightedAverageThermometer(mqtt, pairs)
+    manager.add(t, send_updates=True)
+    return t
 
 
 class Thermometer(Sensor):
@@ -52,20 +35,23 @@ class Thermometer(Sensor):
     def get_name(self):
         return self._name
 
+    def __call__(self, *args, **kwargs):
+        return self.state_get()
+
 
 class ThermometerWeight(Cover):
     def __init__(self, mqtt, name, position=5):
-        super().__init__(mqtt, name, 0, 10)
         self._position = position
+        super().__init__(mqtt, name, 0, 10)
 
     def position_set(self, value):
-        self._position = value
+        self._position = value * 1.0
 
     def position_get(self):
         return self._position
 
     def multiplier(self):
-        return self._position / 100
+        return self._position
 
 
 class AverageThermometer(Sensor):
@@ -78,6 +64,9 @@ class AverageThermometer(Sensor):
         for t in self._thermometers:
             res = res + t.state_get()
         return res / len(self._thermometers)
+
+    def __call__(self, *args, **kwargs):
+        return self.state_get()
 
 
 class WeightedAverageThermometer(Sensor):
@@ -93,7 +82,10 @@ class WeightedAverageThermometer(Sensor):
         for x, y in zip(values, weights):
             res += x * y
 
-        return res / sum(self._thermometers)
+        return res / (sum(weights) * 1.0)
+
+    def __call__(self, *args, **kwargs):
+        return self.state_get()
 
 
 def get_thermometers():

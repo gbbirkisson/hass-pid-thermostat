@@ -1,23 +1,8 @@
 import logging
-import sys
 
 from gpiozero import LED
 
 from hass.components import Switch
-
-
-def create_ssr(mqtt, pin, error_sensor=None):
-    led = LED(pin)
-
-    def _set_state(s):
-        try:
-            led.value = s
-        except:
-            if error_sensor is not None:
-                error_sensor.register_error(
-                    "Could not set pin value '{}': {}".format(s, led, sys.exc_info()[0]))
-
-    return SSR(mqtt, _set_state)
 
 
 class SSR(Switch):
