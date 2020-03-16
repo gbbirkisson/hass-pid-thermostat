@@ -55,11 +55,14 @@ def ssr_and_thermometers(mqtt, error_sensor):
 
 def run(m, h):
     global RUN
+    m.send_updates()
+    last_update = time.monotonic()
     while RUN:
         try:
-            time.sleep(0.5)
             h.apply_controller()
-            m.send_updates()
+            if time.monotonic() - last_update > 2: # Send updates every 2 seconds
+                m.send_updates()
+                last_update = time.monotonic()
         except:  # catch *all* exceptions
             traceback.print_exc(file=sys.stdout)
             kill()
