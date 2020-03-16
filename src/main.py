@@ -5,6 +5,7 @@ import sys
 import time
 import traceback
 
+from devices.devices import create_ssr, create_DS18B20_all_thermometers
 from devices.devices_fake import create_fake_ssr, create_fake_thermostat
 from devices.errors import create_error_sensor
 from devices.hvac import create_hvac
@@ -48,14 +49,15 @@ def ssr_and_thermometers(mqtt, error_sensor):
             create_fake_thermostat(mqtt, '000008fb871f')
         ]
     else:
-        return []
+        return create_ssr(mqtt, env('SSR_PIN', 'GPIO18'), error_sensor), create_DS18B20_all_thermometers(mqtt,
+                                                                                                         error_sensor)
 
 
 def run(m, h):
     global RUN
     while RUN:
         try:
-            time.sleep(1)
+            time.sleep(0.5)
             h.apply_controller()
             m.send_updates()
         except:  # catch *all* exceptions
@@ -64,30 +66,31 @@ def run(m, h):
 
 
 if __name__ == "__main__":
-    # Create component manager
+    logging.info('Create component manager')
     manager = Manager()
 
     with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS) as mqtt:
-        # Create error sensor
+        logging.info('Create error sensor')
         error_sensor = create_error_sensor(mqtt)
         manager.add(error_sensor)
 
-        # Create SSR and thermometers
+        logging.info('Create SSR and thermometers')
         ssr, thermometers = ssr_and_thermometers(mqtt, error_sensor)
         manager.add(ssr)
         manager.add(thermometers, send_updates=True)
 
-        # Create average thermometer
+        logging.info('Create average thermometer')
         therm_avg = create_average_thermometer(mqtt, thermometers)
         manager.add(therm_avg, send_updates=True)
 
-        # Create weight average thermometer
+        logging.info('Create weight average thermometer')
         therm_weight_avg = create_weighted_average_thermometer(mqtt, thermometers)
         manager.add(therm_weight_avg, send_updates=True)
 
-        # Create hvac
+        logging.info('Create hvac')
         hvac = create_hvac(mqtt, ssr, therm_weight_avg)
         manager.add(hvac, send_updates=True)
 
         with manager:
+            logging.info('Run controller')
             run(manager, hvac)

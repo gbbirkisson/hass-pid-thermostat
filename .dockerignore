@@ -1,6 +1,6 @@
 # Ignore everything
 **
 
-# Whitelise
+# Whitelist
 !/requirements.txt
 !/src/**

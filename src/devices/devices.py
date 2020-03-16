@@ -1,3 +1,4 @@
+import logging
 import sys
 
 from ds18b20 import DS18B20
@@ -12,6 +13,8 @@ def create_DS18B20_all_thermometers(mqtt, error_sensor=None):
 
     if len(sensors_ids) == 0:
         raise Exception('No temp sensor detected')
+
+    logging.info('Found sensors %s' % sensors_ids)
 
     return [create_DS18B20_thermometer(mqtt, i, error_sensor) for i in sensors_ids]
 
