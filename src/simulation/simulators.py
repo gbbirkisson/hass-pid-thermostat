@@ -3,7 +3,7 @@ import time
 
 from matplotlib import pyplot as plt
 
-from controller import control_switch
+from devices.pid import control_switch
 from simulation.thermostat import FakeThermostat
 
 seconds = 1.00
@@ -33,7 +33,7 @@ def create_simulator(pid, invert):
 def heater_simulator(tg):
     return create_simulator(PID(
         3.5,
-        0,
+        1,
         5,
         setpoint=tg,
         sample_time=8,

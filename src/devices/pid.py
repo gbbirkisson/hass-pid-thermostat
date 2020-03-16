@@ -28,7 +28,7 @@ def switch_delta_time(pid, current_temperature, sensor):
             control_percent_human
         ))
     p, i, d = pid.components
-    sensor.set(p, i, d, control_percent_human)
+    sensor(p, i, d, control_percent_human)
     return control_percent
 
 

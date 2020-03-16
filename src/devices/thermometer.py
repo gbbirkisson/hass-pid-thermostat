@@ -1,5 +1,14 @@
 from devices import call_children
 from hass.components import Sensor, SettableSensor
+from utils import env, env_int
+
+
+def _get_name(name):
+    return env('OVERRIDE_NAME_' + name.upper(), name)
+
+
+def _get_weight(name, default):
+    return env_int(name.upper(), default)
 
 
 def create_average_thermometer(mqtt, thermometers):
@@ -12,7 +21,7 @@ def create_weighted_average_thermometer(mqtt, thermometers):
 
 class Thermometer(Sensor):
     def __init__(self, mqtt, name, read_func):
-        self._name = name.lower()
+        self._name = _get_name(name).lower()
         self._therm = read_func
         super().__init__(mqtt, 'temp_' + self._name, '°C')
 
@@ -29,12 +38,12 @@ class Thermometer(Sensor):
 
 class ThermometerWeight(SettableSensor):
     def __init__(self, mqtt, name):
-        super().__init__(mqtt, name, 0, 50, 200)
+        super().__init__(mqtt, name, 0, _get_weight(name, 75), 200)
 
 
 class AverageThermometer(Sensor):
     def __init__(self, mqtt, thermometers):
-        super().__init__(mqtt, 'temp_average', '°C')
+        super().__init__(mqtt, 'temp_average', '°C', icon='mdi:thermometer-lines')
         self._thermometers = thermometers
 
     def state_get(self):
@@ -49,7 +58,7 @@ class AverageThermometer(Sensor):
 
 class WeightedAverageThermometer(Sensor):
     def __init__(self, mqtt, thermometers):
-        super().__init__(mqtt, 'temp_average_weighted', '°C')
+        super().__init__(mqtt, 'temp_average_weighted', '°C', icon='mdi:thermometer-lines')
         self._thermometers = []
         for t in thermometers:
             weight = ThermometerWeight(mqtt, 'weight_{}'.format(t.get_name()))

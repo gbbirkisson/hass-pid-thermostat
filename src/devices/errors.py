@@ -9,7 +9,7 @@ def create_error_sensor(mqtt):
 
 class ErrorSensor(Sensor):
     def __init__(self, mqtt):
-        super().__init__(mqtt, 'errors', 'errors')
+        super().__init__(mqtt, 'errors', ' ', 'mdi:alarm-light')
         self._errors = 0
 
     def _format_state(self, state):

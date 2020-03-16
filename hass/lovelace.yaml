@@ -1,0 +1,59 @@
+title: Home
+views:
+  - cards:
+      - cards:
+          - entity: climate.brew
+            type: thermostat
+          - entities:
+              - entity: climate.brew
+              - entity: sensor.brew_temp_average
+            hours_to_show: 5
+            refresh_interval: 10
+            type: history-graph
+          - entities:
+              - entity: switch.brew_ssr
+              - entity: sensor.brew_percent_on
+              - entity: sensor.brew_errors
+            type: entities
+        title: Status
+        type: vertical-stack
+      - cards:
+          - entities:
+              - entity: sensor.brew_temp_average_weighted
+              - entity: sensor.brew_temp_average
+            type: entities
+          - entities:
+              - entity: sensor.brew_temp_buttom
+              - entity: input_number.brew_temp_weight_buttom
+            type: entities
+          - entities:
+              - entity: sensor.brew_temp_inner
+              - entity: input_number.brew_temp_weight_inner
+            type: entities
+          - entities:
+              - entity: sensor.brew_temp_outer
+              - entity: input_number.brew_temp_weight_outer
+            type: entities
+        title: Thermometers
+        type: vertical-stack
+      - cards:
+          - entities:
+              - entity: input_number.brew_p_gain
+              - entity: input_number.brew_i_gain
+              - entity: input_number.brew_d_gain
+              - entity: input_number.brew_output_limit
+              - entity: input_number.brew_sample_time
+            show_header_toggle: false
+            type: entities
+          - entities:
+              - entity: sensor.brew_p
+              - entity: sensor.brew_i
+              - entity: sensor.brew_d
+            hours_to_show: 5
+            refresh_interval: 10
+            type: history-graph
+        title: PID Controls
+        type: vertical-stack
+    icon: 'mdi:glass-mug-variant'
+    path: beer-making
+    title: Beer Making

@@ -14,8 +14,8 @@ class SSR(Switch):
 
     def state_set(self, state):
         if self._on != state:
-            logging.debug('SSR set {}'.format('ON' if self._on else 'OFF'))
             self._on = state
+            logging.debug('SSR set {}'.format('ON' if self._on else 'OFF'))
             self._switch_func(state)
 
     def __call__(self, state):

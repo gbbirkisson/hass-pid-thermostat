@@ -1,0 +1,188 @@
+input_number:
+  brew_temp_weight_buttom:
+    name: Weight
+    min: 0
+    max: 200
+    step: 1
+    icon: mdi:weight
+  brew_temp_weight_inner:
+    name: Weight
+    min: 0
+    max: 200
+    step: 1
+    icon: mdi:weight
+  brew_temp_weight_outer:
+    name: Weight
+    min: 0
+    max: 200
+    step: 1
+    icon: mdi:weight
+  brew_p_gain:
+    name: P
+    min: 0
+    max: 10
+    step: 0.1
+    icon: mdi:tune
+  brew_i_gain:
+    name: I
+    min: 0
+    max: 10
+    step: 0.1
+    icon: mdi:tune
+  brew_d_gain:
+    name: D
+    min: 0
+    max: 10
+    step: 0.1
+    icon: mdi:tune
+  brew_output_limit:
+    name: Out Limit
+    min: 0
+    max: 20
+    step: 1
+    icon: mdi:tune
+  brew_sample_time:
+    name: Time
+    min: 0
+    max: 600
+    step: 1
+    icon: mdi:tune
+
+
+automation:
+  - trigger:
+      platform: mqtt
+      topic: 'homeassistant/sensor/brew_weight_buttom/state'
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.brew_temp_weight_buttom
+        value: "{{ trigger.payload }}"
+  - trigger:
+      platform: state
+      entity_id: input_number.brew_temp_weight_buttom
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: 'homeassistant/sensor/brew_weight_buttom/cmdSet'
+        retain: true
+        payload: "{{ states('input_number.brew_temp_weight_buttom') | int }}"
+  - trigger:
+      platform: mqtt
+      topic: 'homeassistant/sensor/brew_weight_inner/state'
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.brew_temp_weight_inner
+        value: "{{ trigger.payload }}"
+  - trigger:
+      platform: state
+      entity_id: input_number.brew_temp_weight_inner
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: 'homeassistant/sensor/brew_weight_inner/cmdSet'
+        retain: true
+        payload: "{{ states('input_number.brew_temp_weight_inner') | int }}"
+  - trigger:
+      platform: mqtt
+      topic: 'homeassistant/sensor/brew_weight_outer/state'
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.brew_temp_weight_outer
+        value: "{{ trigger.payload }}"
+  - trigger:
+      platform: state
+      entity_id: input_number.brew_temp_weight_outer
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: 'homeassistant/sensor/brew_weight_outer/cmdSet'
+        retain: true
+        payload: "{{ states('input_number.brew_temp_weight_outer') | int }}"
+  - trigger:
+      platform: mqtt
+      topic: 'homeassistant/sensor/brew_p_gain/state'
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.brew_p_gain
+        value: "{{ trigger.payload }}"
+  - trigger:
+      platform: state
+      entity_id: input_number.brew_p_gain
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: 'homeassistant/sensor/brew_p_gain/cmdSet'
+        retain: true
+        payload: "{{ states('input_number.brew_p_gain') | int }}"
+  - trigger:
+      platform: mqtt
+      topic: 'homeassistant/sensor/brew_i_gain/state'
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.brew_i_gain
+        value: "{{ trigger.payload }}"
+  - trigger:
+      platform: state
+      entity_id: input_number.brew_i_gain
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: 'homeassistant/sensor/brew_i_gain/cmdSet'
+        retain: true
+        payload: "{{ states('input_number.brew_i_gain') | int }}"
+  - trigger:
+      platform: mqtt
+      topic: 'homeassistant/sensor/brew_d_gain/state'
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.brew_d_gain
+        value: "{{ trigger.payload }}"
+  - trigger:
+      platform: state
+      entity_id: input_number.brew_d_gain
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: 'homeassistant/sensor/brew_d_gain/cmdSet'
+        retain: true
+        payload: "{{ states('input_number.brew_d_gain') | int }}"
+  - trigger:
+      platform: mqtt
+      topic: 'homeassistant/sensor/brew_output_limit/state'
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.brew_output_limit
+        value: "{{ trigger.payload }}"
+  - trigger:
+      platform: state
+      entity_id: input_number.brew_output_limit
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: 'homeassistant/sensor/brew_output_limit/cmdSet'
+        retain: true
+        payload: "{{ states('input_number.brew_output_limit') | int }}"
+  - trigger:
+      platform: mqtt
+      topic: 'homeassistant/sensor/brew_sample_time/state'
+    action:
+      service: input_number.set_value
+      data_template:
+        entity_id: input_number.brew_sample_time
+        value: "{{ trigger.payload }}"
+  - trigger:
+      platform: state
+      entity_id: input_number.brew_sample_time
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: 'homeassistant/sensor/brew_sample_time/cmdSet'
+        retain: true
+        payload: "{{ states('input_number.brew_sample_time') | int }}"

@@ -16,6 +16,13 @@ def env_float(key, default=None):
     return float(r)
 
 
+def env_int(key, default=None):
+    r = env(key, str(default))
+    if r is None:
+        return default
+    return int(r)
+
+
 def env_bool(key, default=None):
     r = env(key, str(default))
     if r is None:

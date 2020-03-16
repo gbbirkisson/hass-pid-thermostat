@@ -18,7 +18,7 @@ class HvacValue(SettableSensor):
         self._on_change = on_change
 
     def state_set(self, val):
-        super().state_set(val)
+        super().state_set(float(val))
         self._on_change()
 
 
@@ -34,11 +34,11 @@ class Hvac(Climate):
 
         # Values that can change
         self._pid_p = HvacValue(mqtt, 'p_gain', 0, 3.5, 10, lambda: self._handle_state_change())
-        self._pid_i = HvacValue(mqtt, 'i_gain', 0, 0, 10, lambda: self._handle_state_change())
+        self._pid_i = HvacValue(mqtt, 'i_gain', 0, 1, 10, lambda: self._handle_state_change())
         self._pid_d = HvacValue(mqtt, 'd_gain', 0, 5, 10, lambda: self._handle_state_change())
-        self._pid_sample_time = HvacValue(mqtt, 'sample_time', 5, 8, 60, lambda: self._handle_state_change())
         self._pid_output_limit = HvacValue(mqtt, 'output_limit', 1, 10, 20,
                                            lambda: self._handle_state_change())
+        self._pid_sample_time = HvacValue(mqtt, 'sample_time', 5, 8, 600, lambda: self._handle_state_change())
         self._pid_sensor = create_pid_sensor(mqtt)
         self._children = [self._pid_p, self._pid_i, self._pid_d, self._pid_sample_time, self._pid_output_limit]
 
@@ -74,15 +74,15 @@ class Hvac(Climate):
                     output_limits=[0, self._pid_output_limit.state_get()]
                 )
                 , self._ssr, self._thermometer, self._pid_sensor)
-        else:
+        elif self._mode == 'cool':
             self._controller = control_switch(
                 PID(
-                    self._pid_p.position_get(),
-                    self._pid_i.position_get(),
-                    self._pid_d.position_get(),
+                    self._pid_p.state_get(),
+                    self._pid_i.state_get(),
+                    self._pid_d.state_get(),
                     setpoint=self._target_temp,
-                    sample_time=self._pid_sample_time.position_get(),
-                    output_limits=[-self._pid_output_limit.position_get(), 0]
+                    sample_time=self._pid_sample_time.state_get(),
+                    output_limits=[-self._pid_output_limit.state_get(), 0]
                 )
                 , self._ssr, self._thermometer, self._pid_sensor)
         self._pid_set_available()

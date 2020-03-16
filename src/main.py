@@ -1,17 +1,17 @@
 import atexit
 import logging
 import signal
+import sys
 import time
+import traceback
 
-from devices.switch import get_switch
-from devices.thermometer import get_thermometers
+from devices.devices_fake import create_fake_ssr, create_fake_thermostat
+from devices.errors import create_error_sensor
+from devices.hvac import create_hvac
+from devices.thermometer import create_average_thermometer, create_weighted_average_thermometer
+from hass.components import Manager
 from hass.mqtt import Mqtt
-from hvac import hvac
-from sensor import sensors
-from simulation.switch import fake_switch
-from simulation.thermostat import FakeThermostat
-from switch import switch
-from utils import env_bool, env
+from utils import env, env_bool
 
 LOG_LEVEL = env('LOG_LEVEL', 'info').lower()
 LOG_LEVEL_DICT = {
@@ -27,27 +27,10 @@ MQTT_USER = env('MQTT_USER')
 MQTT_PASS = env('MQTT_PASS')
 SIMULATE = env_bool('SIMULATE', '0')
 
-if SIMULATE:
-    logging.info('Initializing simulation devices')
-    fake = FakeThermostat()
-    pid_switch = fake.switch
-    pump_switch = fake_switch('pump')
-    thermometers = fake.thermometers()
-else:
-    logging.info('Initializing thermometer')
-    thermometers = get_thermometers()
-
-    logging.info('Initializing PID relay')
-    pid_switch = get_switch(env('BOIL_ELEMENT_PIN', 'GPIO18'))
-
-    logging.info('Initializing Pump relay')
-    pump_switch = get_switch(env('PUMP_ELEMENT_PIN', 'GPIO24'))
-
 RUN = True
 
 
 def kill(*args):
-    logging.info("Exiting ...")
     global RUN
     RUN = False
 
@@ -56,34 +39,55 @@ signal.signal(signal.SIGINT, kill)
 signal.signal(signal.SIGTERM, kill)
 atexit.register(kill)
 
-send_update = True
 
-with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS) as mqtt:
-    with sensors(mqtt, thermometers) as sensors, switch(mqtt, pid_switch, 'heater') as heater_switch:
-        with hvac(mqtt, thermometers, heater_switch, sensors) as hvac, switch(mqtt, pump_switch, 'pump') as pump:
+def ssr_and_thermometers(mqtt, error_sensor):
+    if SIMULATE:
+        return create_fake_ssr(mqtt), [
+            create_fake_thermostat(mqtt, '01144e89cbaa'),
+            create_fake_thermostat(mqtt, '01144e806daa'),
+            create_fake_thermostat(mqtt, '000008fb871f')
+        ]
+    else:
+        return []
+
+
+def run(m, h):
+    global RUN
+    while RUN:
+        try:
             time.sleep(1)
+            h.apply_controller()
+            m.send_updates()
+        except:  # catch *all* exceptions
+            traceback.print_exc(file=sys.stdout)
+            kill()
 
-            heater_switch.available = True
-            pump.available = True
-            hvac.available = True
-            sensors.available = True
 
-            logging.info("Running ...")
-            while RUN:
-                if hvac.mode == 'off':
-                    heater_switch(False)
-                elif hvac.mode == 'heat' and hvac.target_temp > 99.0:
-                    logging.debug('Temperature target is higher than 99°c on a heater, relay permanently turned on')
-                    heater_switch(True)
-                elif hvac.mode == 'cool' and hvac.target_temp < 1.0:
-                    logging.debug('Temperature target is higher lower than 1°c on a cool, relay permanently turned on')
-                    heater_switch(True)
-                else:
-                    hvac.controller.__next__()
+if __name__ == "__main__":
+    # Create component manager
+    manager = Manager()
 
-                if send_update:
-                    hvac.send_state()
-                    sensors.send_state()
+    with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS) as mqtt:
+        # Create error sensor
+        error_sensor = create_error_sensor(mqtt)
+        manager.add(error_sensor)
 
-                send_update = not send_update
-                time.sleep(1)
+        # Create SSR and thermometers
+        ssr, thermometers = ssr_and_thermometers(mqtt, error_sensor)
+        manager.add(ssr)
+        manager.add(thermometers, send_updates=True)
+
+        # Create average thermometer
+        therm_avg = create_average_thermometer(mqtt, thermometers)
+        manager.add(therm_avg, send_updates=True)
+
+        # Create weight average thermometer
+        therm_weight_avg = create_weighted_average_thermometer(mqtt, thermometers)
+        manager.add(therm_weight_avg, send_updates=True)
+
+        # Create hvac
+        hvac = create_hvac(mqtt, ssr, therm_weight_avg)
+        manager.add(hvac, send_updates=True)
+
+        with manager:
+            run(manager, hvac)

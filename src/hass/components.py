@@ -48,7 +48,7 @@ class Manager:
 
 
 class _Base(Hass):
-    def __init__(self, mqtt=None, component=None, name=None):
+    def __init__(self, mqtt=None, component=None, name=None, icon=None):
         cid, cname = component_info(name)
         super().__init__(mqtt=mqtt, object_id=cid, component=component)
 
@@ -61,7 +61,12 @@ class _Base(Hass):
             'availability_topic': self._TOPIC_AVAIL,
             'payload_available': 'online',
             'payload_not_available': 'offline',
+
         }
+        if icon is not None:
+            self._config.update({
+                'icon': icon
+            })
 
     def available(self, new_available):
         self._available = new_available
@@ -75,8 +80,8 @@ class _Base(Hass):
 
 
 class Sensor(_Base):
-    def __init__(self, mqtt, name, unit_of_measurement):
-        super().__init__(mqtt=mqtt, component='sensor', name=name)
+    def __init__(self, mqtt, name, unit_of_measurement, icon=None):
+        super().__init__(mqtt=mqtt, component='sensor', name=name, icon=icon)
 
         self._TOPIC_STATE = self.get_topic('state')
 
@@ -202,26 +207,26 @@ class SettableSensor(Sensor):
         # self._config.update({
         #     'command_topic': self._TOPIC_CMD_SET,
         # })
-
+        self._start_val = start_val
         self._min_val = min_val
         self._max_val = max_val
         self._val = start_val
-        self.subscribe(self._TOPIC_CMD_SET, lambda new_state: self.state_set(new_state))
+        self.subscribe(self._TOPIC_CMD_SET, lambda new_state: self.state_set_and_send(new_state))
 
     def _format_state(self, state):
-        return state
-
-    def state_set(self, val):
-        if val > self._max_val:
-            self._val = self._max_val
-        elif val < self._min_val:
-            self._val = self._min_val
+        if state > self._max_val:
+            return self._max_val
+        elif state < self._min_val:
+            return self._min_val
         else:
-            self._val = val
+            return state
+
+    def state_set_and_send(self, state):
+        self._val = self._format_state(state)
         self.state_send()
 
     def state_get(self):
         return self._val
 
     def on_connect(self):
-        self.state_set(self._val)
+        self.state_set_and_send(self._start_val)
