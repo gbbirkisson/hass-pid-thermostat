@@ -33,7 +33,7 @@ def create_DS18B20_thermometer(mqtt, DS18B20_id, error_sensor=None):
                     "Could not read temperature on sensor '{}': {}".format(sensor.get_id(), sys.exc_info()[0]))
         return last_value[0]
 
-    return Thermometer(mqtt, sensor.get_id(), limit_func(_read_temp), error_sensor)
+    return Thermometer(mqtt, sensor.get_id(), limit_func(_read_temp))
 
 
 def create_ssr(mqtt, pin, error_sensor=None):
