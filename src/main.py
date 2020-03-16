@@ -6,7 +6,7 @@ import time
 import traceback
 
 from devices.devices import create_ssr, create_DS18B20_all_thermometers
-from devices.devices_fake import create_fake_ssr, create_fake_thermostat
+from devices.devices_fake import create_fake_ssr, create_fake_thermostat, create_fake_static_thermostat
 from devices.errors import create_error_sensor
 from devices.hvac import create_hvac
 from devices.thermometer import create_average_thermometer, create_weighted_average_thermometer
@@ -45,8 +45,8 @@ def ssr_and_thermometers(mqtt, error_sensor):
     if SIMULATE:
         return create_fake_ssr(mqtt), [
             create_fake_thermostat(mqtt, '01144e89cbaa'),
-            create_fake_thermostat(mqtt, '01144e806daa'),
-            create_fake_thermostat(mqtt, '000008fb871f')
+            create_fake_static_thermostat(mqtt, '01144e806daa', 68),
+            create_fake_static_thermostat(mqtt, '000008fb871f', 42)
         ]
     else:
         return create_ssr(mqtt, env('SSR_PIN', 'GPIO18'), error_sensor), create_DS18B20_all_thermometers(mqtt,

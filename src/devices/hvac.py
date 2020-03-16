@@ -18,7 +18,7 @@ class HvacValue(SettableSensor):
         self._on_change = on_change
 
     def state_set(self, val):
-        super().state_set(float(val))
+        super().state_set(val)
         self._on_change()
 
 

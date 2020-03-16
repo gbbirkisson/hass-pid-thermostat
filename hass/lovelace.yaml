@@ -23,8 +23,8 @@ views:
               - entity: sensor.brew_temp_average
             type: entities
           - entities:
-              - entity: sensor.brew_temp_buttom
-              - entity: input_number.brew_temp_weight_buttom
+              - entity: sensor.brew_temp_bottom
+              - entity: input_number.brew_temp_weight_bottom
             type: entities
           - entities:
               - entity: sensor.brew_temp_inner

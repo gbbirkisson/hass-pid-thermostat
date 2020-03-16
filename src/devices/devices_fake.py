@@ -24,6 +24,10 @@ def create_fake_ssr(mqtt):
     return SSR(mqtt, _set_state)
 
 
+def create_fake_static_thermostat(mqtt, name, temp):
+    return Thermometer(mqtt, name, lambda: temp)
+
+
 def create_fake_thermostat(mqtt, name):
     def _read_temp():
         global last_call, current_temp, on

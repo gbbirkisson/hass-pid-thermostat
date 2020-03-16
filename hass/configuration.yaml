@@ -1,5 +1,5 @@
 input_number:
-  brew_temp_weight_buttom:
+  brew_temp_weight_bottom:
     name: Weight
     min: 0
     max: 200
@@ -52,21 +52,21 @@ input_number:
 automation:
   - trigger:
       platform: mqtt
-      topic: 'homeassistant/sensor/brew_weight_buttom/state'
+      topic: 'homeassistant/sensor/brew_weight_bottom/state'
     action:
       service: input_number.set_value
       data_template:
-        entity_id: input_number.brew_temp_weight_buttom
+        entity_id: input_number.brew_temp_weight_bottom
         value: "{{ trigger.payload }}"
   - trigger:
       platform: state
-      entity_id: input_number.brew_temp_weight_buttom
+      entity_id: input_number.brew_temp_weight_bottom
     action:
       service: mqtt.publish
       data_template:
-        topic: 'homeassistant/sensor/brew_weight_buttom/cmdSet'
+        topic: 'homeassistant/sensor/brew_weight_bottom/cmdSet'
         retain: true
-        payload: "{{ states('input_number.brew_temp_weight_buttom') | int }}"
+        payload: "{{ states('input_number.brew_temp_weight_bottom') | int }}"
   - trigger:
       platform: mqtt
       topic: 'homeassistant/sensor/brew_weight_inner/state'

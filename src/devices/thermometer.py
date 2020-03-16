@@ -69,16 +69,14 @@ class WeightedAverageThermometer(Sensor):
         weights = [weight.state_get() for therm, weight in self._thermometers]
 
         res = 0.0
-        res_bak = 0.0
 
         for x, y in zip(values, weights):
-            res_bak = x
             res += x * y
 
         # If all weights are 0, just return average
         sum_weights = sum(weights)
         if sum_weights == 0:
-            return res_bak / len(weights)
+            return sum(values) / len(values)
 
         return res / sum_weights
 
