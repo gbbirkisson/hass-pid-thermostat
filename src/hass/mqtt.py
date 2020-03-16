@@ -13,7 +13,9 @@ class Mqtt():
 
         self._host = mqtt_host
         self._mqtt_client = Client()
-        #self._mqtt_client.enable_logger(logging.getLogger(__name__))
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.WARN)
+        self._mqtt_client.enable_logger(logger)
 
         if mqtt_username is not None and mqtt_password is not None:
             logging.info('MQTT connecting with user and pass')

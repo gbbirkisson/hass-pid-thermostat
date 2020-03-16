@@ -17,6 +17,12 @@ class SSR(Switch):
             self._on = state
             logging.debug('SSR set {}'.format('ON' if self._on else 'OFF'))
             self._switch_func(state)
+            return True
+        return False
+
+    def state_set_and_send(self, state):
+        if self.state_set(state):
+            self.state_send()
 
     def __call__(self, state):
         self.state_set_and_send(state)

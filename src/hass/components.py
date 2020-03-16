@@ -211,7 +211,7 @@ class SettableSensor(Sensor):
         self._min_val = min_val
         self._max_val = max_val
         self._val = start_val
-        self.subscribe(self._TOPIC_CMD_SET, lambda new_state: self.state_set_and_send(new_state))
+        self.subscribe(self._TOPIC_CMD_SET, lambda new_state: self.state_set_and_send(self._format_state(new_state)))
 
     def _format_state(self, state):
         state = float(state)
@@ -223,11 +223,12 @@ class SettableSensor(Sensor):
             return state
 
     def state_set(self, state):
-        self._val = self._format_state(state)
+        self._val = state
 
     def state_set_and_send(self, state):
-        self.state_set(state)
-        self.state_send()
+        if abs(self._val - state) > 1e-16:
+            self.state_set(state)
+            self.state_send()
 
     def state_get(self):
         return self._val

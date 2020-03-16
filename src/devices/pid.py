@@ -5,7 +5,6 @@ import time
 def temperatures(thermometer):
     while True:
         current_temperature = thermometer()
-        logging.debug('Current temperature is {0:.2f}'.format(current_temperature))
         yield current_temperature
 
 
