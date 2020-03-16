@@ -1,7 +1,9 @@
+import random
 import time
 
 from devices.switch import SSR
 from devices.thermometer import Thermometer
+from utils import limit_func
 
 water_specific_heat = 4184  # 4184 watts will heat a 1L of water up by 1°C every second
 room_temperature = 9
@@ -24,8 +26,13 @@ def create_fake_ssr(mqtt):
     return SSR(mqtt, _set_state)
 
 
-def create_fake_static_thermostat(mqtt, name, temp):
-    return Thermometer(mqtt, name, lambda: temp)
+def create_fake_static_thermostat(mqtt, name, temp, error_sensor):
+    def _fake_errors():
+        if random.randint(0, 50) == 8:
+            error_sensor.register_error("Fake error")
+        return temp
+
+    return Thermometer(mqtt, name, limit_func(_fake_errors, 5))
 
 
 def create_fake_thermostat(mqtt, name):

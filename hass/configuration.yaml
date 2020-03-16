@@ -50,7 +50,8 @@ input_number:
 
 
 automation:
-  - trigger:
+  - alias: brew_weight_bottom_1
+    trigger:
       platform: mqtt
       topic: 'homeassistant/sensor/brew_weight_bottom/state'
     action:
@@ -58,7 +59,8 @@ automation:
       data_template:
         entity_id: input_number.brew_temp_weight_bottom
         value: "{{ trigger.payload }}"
-  - trigger:
+  - alias: brew_weight_bottom_2
+    trigger:
       platform: state
       entity_id: input_number.brew_temp_weight_bottom
     action:
@@ -67,7 +69,8 @@ automation:
         topic: 'homeassistant/sensor/brew_weight_bottom/cmdSet'
         retain: true
         payload: "{{ states('input_number.brew_temp_weight_bottom') | int }}"
-  - trigger:
+  - alias: brew_weight_inner_1
+    trigger:
       platform: mqtt
       topic: 'homeassistant/sensor/brew_weight_inner/state'
     action:
@@ -75,7 +78,8 @@ automation:
       data_template:
         entity_id: input_number.brew_temp_weight_inner
         value: "{{ trigger.payload }}"
-  - trigger:
+  - alias: brew_weight_inner_2
+    trigger:
       platform: state
       entity_id: input_number.brew_temp_weight_inner
     action:
@@ -84,7 +88,8 @@ automation:
         topic: 'homeassistant/sensor/brew_weight_inner/cmdSet'
         retain: true
         payload: "{{ states('input_number.brew_temp_weight_inner') | int }}"
-  - trigger:
+  - alias: brew_weight_outer_1
+    trigger:
       platform: mqtt
       topic: 'homeassistant/sensor/brew_weight_outer/state'
     action:
@@ -92,7 +97,8 @@ automation:
       data_template:
         entity_id: input_number.brew_temp_weight_outer
         value: "{{ trigger.payload }}"
-  - trigger:
+  - alias: brew_weight_outer_2
+    trigger:
       platform: state
       entity_id: input_number.brew_temp_weight_outer
     action:
@@ -101,7 +107,8 @@ automation:
         topic: 'homeassistant/sensor/brew_weight_outer/cmdSet'
         retain: true
         payload: "{{ states('input_number.brew_temp_weight_outer') | int }}"
-  - trigger:
+  - alias: brew_p_gain_1
+    trigger:
       platform: mqtt
       topic: 'homeassistant/sensor/brew_p_gain/state'
     action:
@@ -109,7 +116,8 @@ automation:
       data_template:
         entity_id: input_number.brew_p_gain
         value: "{{ trigger.payload }}"
-  - trigger:
+  - alias: brew_p_gain_2
+    trigger:
       platform: state
       entity_id: input_number.brew_p_gain
     action:
@@ -118,7 +126,8 @@ automation:
         topic: 'homeassistant/sensor/brew_p_gain/cmdSet'
         retain: true
         payload: "{{ states('input_number.brew_p_gain') | int }}"
-  - trigger:
+  - alias: brew_i_gain_1
+    trigger:
       platform: mqtt
       topic: 'homeassistant/sensor/brew_i_gain/state'
     action:
@@ -126,7 +135,8 @@ automation:
       data_template:
         entity_id: input_number.brew_i_gain
         value: "{{ trigger.payload }}"
-  - trigger:
+  - alias: brew_i_gain_2
+    trigger:
       platform: state
       entity_id: input_number.brew_i_gain
     action:
@@ -135,7 +145,8 @@ automation:
         topic: 'homeassistant/sensor/brew_i_gain/cmdSet'
         retain: true
         payload: "{{ states('input_number.brew_i_gain') | int }}"
-  - trigger:
+  - alias: brew_d_gain_1
+    trigger:
       platform: mqtt
       topic: 'homeassistant/sensor/brew_d_gain/state'
     action:
@@ -143,7 +154,8 @@ automation:
       data_template:
         entity_id: input_number.brew_d_gain
         value: "{{ trigger.payload }}"
-  - trigger:
+  - alias: brew_d_gain_2
+    trigger:
       platform: state
       entity_id: input_number.brew_d_gain
     action:
@@ -152,7 +164,8 @@ automation:
         topic: 'homeassistant/sensor/brew_d_gain/cmdSet'
         retain: true
         payload: "{{ states('input_number.brew_d_gain') | int }}"
-  - trigger:
+  - alias: brew_output_limit_1
+    trigger:
       platform: mqtt
       topic: 'homeassistant/sensor/brew_output_limit/state'
     action:
@@ -160,7 +173,8 @@ automation:
       data_template:
         entity_id: input_number.brew_output_limit
         value: "{{ trigger.payload }}"
-  - trigger:
+  - alias: brew_output_limit_2
+    trigger:
       platform: state
       entity_id: input_number.brew_output_limit
     action:
@@ -169,7 +183,8 @@ automation:
         topic: 'homeassistant/sensor/brew_output_limit/cmdSet'
         retain: true
         payload: "{{ states('input_number.brew_output_limit') | int }}"
-  - trigger:
+  - alias: brew_sample_time_1
+    trigger:
       platform: mqtt
       topic: 'homeassistant/sensor/brew_sample_time/state'
     action:
@@ -177,7 +192,8 @@ automation:
       data_template:
         entity_id: input_number.brew_sample_time
         value: "{{ trigger.payload }}"
-  - trigger:
+  - alias: brew_sample_time_2
+    trigger:
       platform: state
       entity_id: input_number.brew_sample_time
     action:

@@ -1,8 +1,24 @@
 import os
+import time
 
 
 class Component:
     pass
+
+
+def limit_func(func, seconds=1):
+    last_called = [time.monotonic()]
+    last_value = [None]
+
+    def wrap():
+        dt = time.monotonic() - last_called[0]
+        do_call = dt > seconds
+        if last_value[0] is None or do_call:
+            last_value[0] = func()
+            last_called[0] = time.monotonic()
+        return last_value[0]
+
+    return wrap
 
 
 def env(key, default=None):

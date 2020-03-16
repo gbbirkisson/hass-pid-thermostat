@@ -45,8 +45,8 @@ def ssr_and_thermometers(mqtt, error_sensor):
     if SIMULATE:
         return create_fake_ssr(mqtt), [
             create_fake_thermostat(mqtt, '01144e89cbaa'),
-            create_fake_static_thermostat(mqtt, '01144e806daa', 68),
-            create_fake_static_thermostat(mqtt, '000008fb871f', 42)
+            create_fake_static_thermostat(mqtt, '01144e806daa', 68, error_sensor),
+            create_fake_static_thermostat(mqtt, '000008fb871f', 42, error_sensor)
         ]
     else:
         return create_ssr(mqtt, env('SSR_PIN', 'GPIO18'), error_sensor), create_DS18B20_all_thermometers(mqtt,
