@@ -3,10 +3,8 @@ import logging
 from hass.components import Sensor
 
 
-def create_error_sensor(mqtt, manager):
-    e = ErrorSensor(mqtt)
-    manager.add(e, send_updates=False)
-    return e
+def create_error_sensor(mqtt):
+    return ErrorSensor(mqtt)
 
 
 class ErrorSensor(Sensor):

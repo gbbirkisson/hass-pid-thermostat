@@ -1,17 +1,12 @@
+from devices import call_children
 from hass.components import Sensor
 
 
-def create_pid_sensor(mqtt, manager):
+def create_pid_sensor(mqtt):
     p = Generic(mqtt, 'p', ' ')
     i = Generic(mqtt, 'i', ' ')
     d = Generic(mqtt, 'd', ' ')
     percent_on = Generic(mqtt, 'percent_on', '%')
-
-    manager.add(p, send_updates=False)
-    manager.add(i, send_updates=False)
-    manager.add(d, send_updates=False)
-    manager.add(percent_on, send_updates=False)
-
     return PidSensor(p, i, d, percent_on)
 
 
@@ -37,9 +32,23 @@ class PidSensor:
         self._i = i
         self._d = d
         self._percent_on = percent_on
+        self._children = [self._p, self._i, self._d, self._percent_on]
+
+    def available(self, new_available):
+        call_children(self._children, 'available', new_available)
 
     def set(self, p, i, d, percent_on):
         self._p.set_and_send(p)
         self._i.set_and_send(i)
         self._d.set_and_send(d)
         self._percent_on.set_and_send(percent_on)
+
+    def on_connect(self):
+        call_children(self._children, 'on_connect')
+
+    def __enter__(self):
+        call_children(self._children, '__enter__')
+        return self
+
+    def __exit__(self, *args):
+        call_children(self._children, '__exit__', *args)

@@ -194,30 +194,34 @@ class Climate(_Base):
         self.target_set_and_send(self.current_get())
 
 
-class Cover(_Base):
-    def __init__(self, mqtt, name, min=0, max=100):
-        super().__init__(mqtt=mqtt, component='cover', name=name)
+class SettableSensor(Sensor):
+    def __init__(self, mqtt, name, min_val, start_val, max_val):
+        super().__init__(mqtt, name, ' ')
 
-        self._TOPIC_STATE = self.get_topic('state')
         self._TOPIC_CMD_SET = self.get_topic('cmdSet')
+        # self._config.update({
+        #     'command_topic': self._TOPIC_CMD_SET,
+        # })
 
-        self._config.update({
-            'position_topic': self._TOPIC_STATE,
-            'set_position_topic': self._TOPIC_CMD_SET,
-            'position_closed': min,
-            'position_open': max,
-            'optimistic': False,
-            'retain': True,
-            'qos': 1
-        })
+        self._min_val = min_val
+        self._max_val = max_val
+        self._val = start_val
+        self.subscribe(self._TOPIC_CMD_SET, lambda new_state: self.state_set(new_state))
 
-        self.subscribe(self._TOPIC_CMD_SET, lambda new_value: self.position_set(new_value))
+    def _format_state(self, state):
+        return state
 
-    def position_set(self, value):
-        raise NotImplementedError
+    def state_set(self, val):
+        if val > self._max_val:
+            self._val = self._max_val
+        elif val < self._min_val:
+            self._val = self._min_val
+        else:
+            self._val = val
+        self.state_send()
 
-    def position_get(self):
-        raise NotImplementedError
+    def state_get(self):
+        return self._val
 
-    def state_send(self):
-        self.publish(self._TOPIC_STATE, self.position_get())
+    def on_connect(self):
+        self.state_set(self._val)

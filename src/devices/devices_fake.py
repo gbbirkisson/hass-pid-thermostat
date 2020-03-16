@@ -1,4 +1,3 @@
-import random
 import time
 
 from devices.switch import SSR
@@ -51,6 +50,6 @@ def create_fake_thermostat(mqtt, name):
             current_temp = clamp(room_temperature, current_temp - temperature_loss)
 
         last_call = now
-        return current_temp + ((random.random() - 0.5) * 2)
+        return current_temp  # + ((random.random() - 0.5) / 2)
 
     return Thermometer(mqtt, name, _read_temp)
