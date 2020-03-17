@@ -65,6 +65,7 @@ class Hvac(Climate):
         if self._mode == 'off':
             self._controller = None
             self._pid_sensor(0.0, 0.0, 0.0, 0.0)
+            self._ssr(False)
         elif self._mode == 'heat':
             self._controller = control_switch(
                 PID(
