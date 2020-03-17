@@ -1,24 +1,27 @@
 import os
-import time
 
 
-class Component:
-    pass
+class FuncWrapper:
+    def __init__(self):
+        self._funcs = {}
+
+    def wrap(self, f):
+        self._funcs[f] = None
+
+        def _w():
+            if self._funcs[f] is None:
+                self._funcs[f] = f()
+            return self._funcs[f]
+
+        return _w
+
+    def clear(self):
+        for f in self._funcs:
+            self._funcs[f] = None
+        return
 
 
-def limit_func(func, seconds=1):
-    last_called = [time.monotonic()]
-    last_value = [None]
-
-    def wrap():
-        dt = time.monotonic() - last_called[0]
-        do_call = dt > seconds
-        if last_value[0] is None or do_call:
-            last_value[0] = func()
-            last_called[0] = time.monotonic()
-        return last_value[0]
-
-    return wrap
+func_wrapper = FuncWrapper()
 
 
 def env(key, default=None):

@@ -6,10 +6,10 @@ from gpiozero import LED
 
 from devices.switch import SSR
 from devices.thermometer import Thermometer
-from utils import limit_func
+from utils import func_wrapper
 
 
-def create_DS18B20_all_thermometers(mqtt, error_sensor=None):
+def create_DS18B20_all_thermometers(manager, error_sensor=None):
     sensors_ids = DS18B20.get_available_sensors()
 
     if len(sensors_ids) == 0:
@@ -17,10 +17,10 @@ def create_DS18B20_all_thermometers(mqtt, error_sensor=None):
 
     logging.info('Found sensors %s' % sensors_ids)
 
-    return [create_DS18B20_thermometer(mqtt, i, error_sensor) for i in sensors_ids]
+    return [create_DS18B20_thermometer(manager, i, error_sensor) for i in sensors_ids]
 
 
-def create_DS18B20_thermometer(mqtt, DS18B20_id, error_sensor=None):
+def create_DS18B20_thermometer(manager, DS18B20_id, error_sensor=None):
     sensor = DS18B20(DS18B20_id)
     last_value = [sensor.get_temperature()]
 
@@ -33,10 +33,10 @@ def create_DS18B20_thermometer(mqtt, DS18B20_id, error_sensor=None):
                     "Could not read temperature on sensor '{}': {}".format(sensor.get_id(), sys.exc_info()[0]))
         return last_value[0]
 
-    return Thermometer(mqtt, sensor.get_id(), limit_func(_read_temp))
+    return Thermometer(manager, sensor.get_id(), func_wrapper.wrap(_read_temp))
 
 
-def create_ssr(mqtt, pin, error_sensor=None):
+def create_ssr(manager, pin, error_sensor=None):
     led = LED(pin)
 
     def _set_state(s):
@@ -47,4 +47,4 @@ def create_ssr(mqtt, pin, error_sensor=None):
                 error_sensor.register_error(
                     "Could not set pin value '{}': {}".format(s, led, sys.exc_info()[0]))
 
-    return SSR(mqtt, _set_state)
+    return SSR(manager, _set_state)

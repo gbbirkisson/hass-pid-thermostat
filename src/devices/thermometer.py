@@ -1,6 +1,6 @@
 from devices import call_children
 from hass.components import Sensor, SettableSensor
-from utils import env, env_int
+from utils import env, env_int, func_wrapper
 
 
 def _get_name(name):
@@ -11,19 +11,19 @@ def _get_weight(name, default):
     return env_int(name.upper(), default)
 
 
-def create_average_thermometer(mqtt, thermometers):
-    return AverageThermometer(mqtt, thermometers)
+def create_average_thermometer(manager, thermometers):
+    return AverageThermometer(manager, thermometers)
 
 
-def create_weighted_average_thermometer(mqtt, thermometers):
-    return WeightedAverageThermometer(mqtt, thermometers)
+def create_weighted_average_thermometer(manager, thermometers):
+    return WeightedAverageThermometer(manager, thermometers)
 
 
 class Thermometer(Sensor):
-    def __init__(self, mqtt, name, read_func):
+    def __init__(self, manager, name, read_func):
         self._name = _get_name(name).lower()
         self._therm = read_func
-        super().__init__(mqtt, 'temp_' + self._name, '°C')
+        super().__init__(manager, 'temp_' + self._name, '°C')
 
     # noinspection PyBroadException
     def state_get(self):
@@ -37,14 +37,16 @@ class Thermometer(Sensor):
 
 
 class ThermometerWeight(SettableSensor):
-    def __init__(self, mqtt, name):
-        super().__init__(mqtt, name, 0, _get_weight(name, 75), 200)
+    def __init__(self, manager, name):
+        super().__init__(manager, name, 0, _get_weight(name, 75), 200)
 
 
 class AverageThermometer(Sensor):
-    def __init__(self, mqtt, thermometers):
-        super().__init__(mqtt, 'temp_average', '°C', icon='mdi:thermometer-lines')
+    def __init__(self, manager, thermometers):
+        super().__init__(manager, 'temp_average', '°C', icon='mdi:thermometer-lines')
         self._thermometers = thermometers
+
+        self.state_get = func_wrapper.wrap(self.state_get)
 
     def state_get(self):
         res = 0.0
@@ -57,12 +59,14 @@ class AverageThermometer(Sensor):
 
 
 class WeightedAverageThermometer(Sensor):
-    def __init__(self, mqtt, thermometers):
-        super().__init__(mqtt, 'temp_average_weighted', '°C', icon='mdi:thermometer-lines')
+    def __init__(self, manager, thermometers):
+        super().__init__(manager, 'temp_average_weighted', '°C', icon='mdi:thermometer-lines')
         self._thermometers = []
         for t in thermometers:
-            weight = ThermometerWeight(mqtt, 'weight_{}'.format(t.get_name()))
+            weight = ThermometerWeight(manager, 'weight_{}'.format(t.get_name()))
             self._thermometers.append((t, weight))
+
+        self.state_get = func_wrapper.wrap(self.state_get)
 
     def state_get(self):
         values = [therm.state_get() for therm, weight in self._thermometers]
@@ -79,10 +83,6 @@ class WeightedAverageThermometer(Sensor):
             return sum(values) / len(values)
 
         return res / sum_weights
-
-    def available(self, new_available):
-        call_children([w for _, w in self._thermometers], 'available', new_available)
-        super().available(new_available)
 
     def on_connect(self):
         call_children([w for _, w in self._thermometers], 'on_connect')

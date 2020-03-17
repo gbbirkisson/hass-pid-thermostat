@@ -7,7 +7,7 @@ water_specific_heat = 4184  # 4184 watts will heat a 1L of water up by 1°C ever
 room_temperature = 9
 liters = 20
 boiler_watts = 2500
-minutes_down_one_degree = 10
+minutes_down_one_degree = 5
 
 
 class FakeThermostat:

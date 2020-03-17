@@ -12,7 +12,7 @@ from devices.hvac import create_hvac
 from devices.thermometer import create_average_thermometer, create_weighted_average_thermometer
 from hass.components import Manager
 from hass.mqtt import Mqtt
-from utils import env, env_bool
+from utils import env, env_bool, func_wrapper
 
 LOG_LEVEL = env('LOG_LEVEL', 'info').lower()
 LOG_LEVEL_DICT = {
@@ -43,56 +43,54 @@ atexit.register(kill)
 
 def ssr_and_thermometers(mqtt, error_sensor):
     if SIMULATE:
-        return create_fake_ssr(mqtt), [
-            create_fake_thermostat(mqtt, '01144e89cbaa'),
-            create_fake_static_thermostat(mqtt, '01144e806daa', 68, error_sensor),
-            create_fake_static_thermostat(mqtt, '000008fb871f', 42, error_sensor)
+        return create_fake_ssr(manager), [
+            create_fake_thermostat(manager, '01144e89cbaa'),
+            create_fake_static_thermostat(manager, '01144e806daa', 68, error_sensor),
+            create_fake_static_thermostat(manager, '000008fb871f', 42, error_sensor)
         ]
     else:
-        return create_ssr(mqtt, env('SSR_PIN', 'GPIO18'), error_sensor), create_DS18B20_all_thermometers(mqtt,
-                                                                                                         error_sensor)
+        return create_ssr(manager, env('SSR_PIN', 'GPIO18'), error_sensor), create_DS18B20_all_thermometers(mqtt,
+                                                                                                            error_sensor)
 
 
 def run(m, h):
     global RUN
-    m.send_updates()
-    last_update = time.monotonic()
     while RUN:
         try:
+            m.send_updates()
             h.apply_controller()
-            if time.monotonic() - last_update > 2: # Send updates every 2 seconds
-                m.send_updates()
-                last_update = time.monotonic()
+            func_wrapper.clear()
+            #time.sleep(0.2)
         except:  # catch *all* exceptions
             traceback.print_exc(file=sys.stdout)
             kill()
 
 
 if __name__ == "__main__":
-    logging.info('Create component manager')
-    manager = Manager()
-
     with Mqtt(mqtt_host=MQTT_HOST, mqtt_username=MQTT_USER, mqtt_password=MQTT_PASS) as mqtt:
+        logging.info('Create component manager')
+        manager = Manager(mqtt)
+
         logging.info('Create error sensor')
-        error_sensor = create_error_sensor(mqtt)
-        manager.add(error_sensor)
+        error_sensor = create_error_sensor(manager)
+        manager.add_component(error_sensor)
 
         logging.info('Create SSR and thermometers')
-        ssr, thermometers = ssr_and_thermometers(mqtt, error_sensor)
-        manager.add(ssr)
-        manager.add(thermometers, send_updates=True)
+        ssr, thermometers = ssr_and_thermometers(manager, error_sensor)
+        manager.add_component(ssr)
+        manager.add_component(thermometers)
 
         logging.info('Create average thermometer')
-        therm_avg = create_average_thermometer(mqtt, thermometers)
-        manager.add(therm_avg, send_updates=True)
+        therm_avg = create_average_thermometer(manager, thermometers)
+        manager.add_component(therm_avg)
 
         logging.info('Create weight average thermometer')
-        therm_weight_avg = create_weighted_average_thermometer(mqtt, thermometers)
-        manager.add(therm_weight_avg, send_updates=True)
+        therm_weight_avg = create_weighted_average_thermometer(manager, thermometers)
+        manager.add_component(therm_weight_avg)
 
         logging.info('Create hvac')
-        hvac = create_hvac(mqtt, ssr, therm_weight_avg)
-        manager.add(hvac, send_updates=True)
+        hvac = create_hvac(manager, ssr, therm_weight_avg)
+        manager.add_component(hvac)
 
         with manager:
             logging.info('Run controller')

@@ -20,9 +20,5 @@ class SSR(Switch):
             return True
         return False
 
-    def state_set_and_send(self, state):
-        if self.state_set(state):
-            self.state_send()
-
     def __call__(self, state):
-        self.state_set_and_send(state)
+        self.state_set(state)

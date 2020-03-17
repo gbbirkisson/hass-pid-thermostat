@@ -1,5 +1,7 @@
 import logging
 
+DISCOVERY_PREFIX = 'homeassistant'
+
 
 class Hass():
     def __init__(
@@ -7,7 +9,7 @@ class Hass():
             mqtt=None,
             object_id=None,
             component=None,
-            discovery_prefix='homeassistant',
+            discovery_prefix=DISCOVERY_PREFIX,
             node_id=None,
     ):
         assert mqtt is not None, "object id cannot be None"

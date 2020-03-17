@@ -32,12 +32,12 @@ def create_simulator(pid, invert):
 
 def heater_simulator(tg):
     return create_simulator(PID(
-        3.5,
+        6,
+        3,
         1,
-        5,
         setpoint=tg,
         sample_time=8,
-        output_limits=(0, 10)
+        output_limits=(0, 5)
     ), False)
 
 
@@ -72,10 +72,10 @@ if __name__ == '__main__':
             break
 
     logging.basicConfig(level=logging.ERROR)
-
+    plt.style.use('seaborn')
     fig, ax1 = plt.subplots()
+    ax1.plot(x, t, linestyle='dotted')
     ax1.plot(x, y)
-    ax1.plot(x, t)
     ax1.set_xlabel('minutes')
     ax1.set_ylabel('°C', color='b')
     ax1.legend(['Actual', 'Target'])
@@ -84,4 +84,4 @@ if __name__ == '__main__':
     # ax2.plot(x, on, 'r.')
     # ax2.set_ylabel('on/off', color='r')
     fig.tight_layout()
-    fig.savefig('simulation.png', bbox_inches='tight')
+    fig.savefig('simulation.png', bbox_inches='tight', dpi=300)

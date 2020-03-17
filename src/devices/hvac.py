@@ -8,13 +8,13 @@ from devices.sensors import create_pid_sensor
 from hass.components import Climate, SettableSensor
 
 
-def create_hvac(mqtt, ssr, thermometer):
-    return Hvac(mqtt, None, ['heat', 'cool'], ssr, thermometer)
+def create_hvac(manager, ssr, thermometer):
+    return Hvac(manager, None, ['heat', 'cool'], ssr, thermometer)
 
 
 class HvacValue(SettableSensor):
-    def __init__(self, mqtt, name, min_val, start_val, max_val, on_change):
-        super().__init__(mqtt, name, min_val, start_val, max_val)
+    def __init__(self, manager, name, min_val, start_val, max_val, on_change):
+        super().__init__(manager, name, min_val, start_val, max_val)
         self._on_change = on_change
 
     def state_set(self, val):
@@ -23,9 +23,9 @@ class HvacValue(SettableSensor):
 
 
 class Hvac(Climate):
-    def __init__(self, mqtt, name, mode, ssr, thermometer):
+    def __init__(self, manager, name, mode, ssr, thermometer):
         mode.append('off')
-        super().__init__(mqtt, name, mode)
+        super().__init__(manager, name, mode)
         self._mode = 'off'
         self._ssr = ssr
         self._thermometer = thermometer
@@ -33,13 +33,13 @@ class Hvac(Climate):
         self._controller = None
 
         # Values that can change
-        self._pid_p = HvacValue(mqtt, 'p_gain', 0, 3.5, 10, lambda: self._handle_state_change())
-        self._pid_i = HvacValue(mqtt, 'i_gain', 0, 1, 10, lambda: self._handle_state_change())
-        self._pid_d = HvacValue(mqtt, 'd_gain', 0, 5, 10, lambda: self._handle_state_change())
-        self._pid_output_limit = HvacValue(mqtt, 'output_limit', 1, 10, 20,
+        self._pid_p = HvacValue(manager, 'p_gain', 0, 6, 10, lambda: self._handle_state_change())
+        self._pid_i = HvacValue(manager, 'i_gain', 0, 3, 10, lambda: self._handle_state_change())
+        self._pid_d = HvacValue(manager, 'd_gain', 0, 1, 10, lambda: self._handle_state_change())
+        self._pid_output_limit = HvacValue(manager, 'output_limit', 1, 5, 20,
                                            lambda: self._handle_state_change())
-        self._pid_sample_time = HvacValue(mqtt, 'sample_time', 5, 8, 600, lambda: self._handle_state_change())
-        self._pid_sensor = create_pid_sensor(mqtt)
+        self._pid_sample_time = HvacValue(manager, 'sample_time', 5, 8, 600, lambda: self._handle_state_change())
+        self._pid_sensor = create_pid_sensor(manager)
         self._children = [self._pid_p, self._pid_i, self._pid_d, self._pid_sample_time, self._pid_output_limit]
 
     def mode_get(self):
@@ -63,6 +63,7 @@ class Hvac(Climate):
     def _handle_state_change(self):
         if self._mode == 'off':
             self._controller = None
+            self._pid_sensor(0.0, 0.0, 0.0, 0.0)
         elif self._mode == 'heat':
             self._controller = control_switch(
                 PID(
@@ -85,16 +86,6 @@ class Hvac(Climate):
                     output_limits=[-self._pid_output_limit.state_get(), 0]
                 )
                 , self._ssr, self._thermometer, self._pid_sensor)
-        self._pid_set_available()
-        self.mode_send()
-
-    def _pid_set_available(self):
-        call_children([self._pid_sensor], 'available', self._controller is not None)
-
-    def available(self, new_available):
-        self._available = new_available
-        call_children(self._children, 'available', new_available)
-        self.publish(self._TOPIC_AVAIL, 'online' if self._available else 'offline')
 
     def on_connect(self):
         call_children(self._children, 'on_connect')
