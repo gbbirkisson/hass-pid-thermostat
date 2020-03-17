@@ -26,6 +26,7 @@ class Hvac(Climate):
     def __init__(self, manager, name, mode, ssr, thermometer):
         mode.append('off')
         super().__init__(manager, name, mode)
+        self._manager = manager
         self._mode = 'off'
         self._ssr = ssr
         self._thermometer = thermometer
@@ -86,6 +87,7 @@ class Hvac(Climate):
                     output_limits=[-self._pid_output_limit.state_get(), 0]
                 )
                 , self._ssr, self._thermometer, self._pid_sensor)
+        self._manager.send_updates()
 
     def on_connect(self):
         call_children(self._children, 'on_connect')
