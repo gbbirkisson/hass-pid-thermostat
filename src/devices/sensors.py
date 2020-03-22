@@ -61,8 +61,9 @@ class EstimateTarget(Sensor):
     def __init__(self, manager, name):
         super().__init__(manager, name, 'minutes', 'mdi:clock')
         self._est_array = []
+        self._est_array_size = 4
         self._est = 0
-        self._sample_rate = 5
+        self._sample_rate = 3
         self._curr_interval = 0
         self._reset()
 
@@ -95,7 +96,7 @@ class EstimateTarget(Sensor):
         if len(self._est_array) < 2:
             return
 
-        if len(self._est_array) > 5:
+        if len(self._est_array) > self._est_array_size:
             _, *tail = self._est_array
             self._est_array = tail
 
