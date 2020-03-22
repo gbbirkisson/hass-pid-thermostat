@@ -11,8 +11,9 @@ views:
             refresh_interval: 10
             type: history-graph
           - entities:
-              - entity: switch.brew_ssr
+              - entity: sensor.brew_minutes_to_target
               - entity: sensor.brew_percent_on
+              - entity: switch.brew_ssr
               - entity: sensor.brew_errors
             type: entities
         title: Status

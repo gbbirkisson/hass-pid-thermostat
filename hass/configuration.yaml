@@ -125,7 +125,7 @@ automation:
       data_template:
         topic: 'homeassistant/sensor/brew_p_gain/cmdSet'
         retain: true
-        payload: "{{ states('input_number.brew_p_gain') | int }}"
+        payload: "{{ states('input_number.brew_p_gain') | float }}"
   - alias: brew_i_gain_1
     trigger:
       platform: mqtt
@@ -144,7 +144,7 @@ automation:
       data_template:
         topic: 'homeassistant/sensor/brew_i_gain/cmdSet'
         retain: true
-        payload: "{{ states('input_number.brew_i_gain') | int }}"
+        payload: "{{ states('input_number.brew_i_gain') | float }}"
   - alias: brew_d_gain_1
     trigger:
       platform: mqtt
@@ -163,7 +163,7 @@ automation:
       data_template:
         topic: 'homeassistant/sensor/brew_d_gain/cmdSet'
         retain: true
-        payload: "{{ states('input_number.brew_d_gain') | int }}"
+        payload: "{{ states('input_number.brew_d_gain') | float }}"
   - alias: brew_output_limit_1
     trigger:
       platform: mqtt

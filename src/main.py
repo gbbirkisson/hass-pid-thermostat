@@ -57,10 +57,10 @@ def run(m, h, est):
     global RUN
     while RUN:
         try:
-            h.apply_controller()
-            est.calculate_estimate(h)
-            func_wrapper.clear()
             m.send_updates()
+            est.calculate_estimate(h)
+            h.apply_controller()
+            func_wrapper.clear()
             # time.sleep(0.2)
         except:  # catch *all* exceptions
             traceback.print_exc(file=sys.stdout)

@@ -94,7 +94,8 @@ class EstimateTarget(Sensor):
             res += (self._est_array[i + 1][1] - self._est_array[i][1]) / (
                     self._est_array[i + 1][0] - self._est_array[i][0])
         res = res / (len(self._est_array) - 1) * 60
-        res = (hvac.target_get() - hvac.current_get()) / res
+        if res != 0:
+            res = (hvac.target_get() - hvac.current_get()) / res
         self._est = math.ceil(abs(res))
 
     def state_get(self):
