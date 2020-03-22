@@ -57,8 +57,8 @@ def run(m, h, est):
     global RUN
     while RUN:
         try:
-            m.send_updates()
             est.calculate_estimate(h)
+            m.send_updates()
             h.apply_controller()
             func_wrapper.clear()
             # time.sleep(0.2)

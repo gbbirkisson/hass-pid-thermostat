@@ -62,11 +62,14 @@ class EstimateTarget(Sensor):
         super().__init__(manager, name, 'minutes', 'mdi:clock')
         self._est_array = []
         self._est = 0
+        self._sample_rate = 5
+        self._curr_interval = 0
         self._reset()
 
     def _reset(self):
         self._est_array = []
         self._est = 999
+        self._curr_interval = 0
 
     def _format_state(self, state):
         return int(state)
@@ -79,6 +82,13 @@ class EstimateTarget(Sensor):
         if abs(hvac.target_get() - hvac.current_get()) < 1:
             self._est = 0
             return
+
+        self._curr_interval = self._curr_interval + 1
+
+        if not self._curr_interval > self._sample_rate:
+            return
+
+        self._curr_interval = 0
 
         self._est_array.append((time.monotonic(), hvac.current_get()))
 
@@ -94,8 +104,10 @@ class EstimateTarget(Sensor):
             res += (self._est_array[i + 1][1] - self._est_array[i][1]) / (
                     self._est_array[i + 1][0] - self._est_array[i][0])
         res = res / (len(self._est_array) - 1) * 60
+
         if res != 0:
             res = (hvac.target_get() - hvac.current_get()) / res
+
         self._est = math.ceil(abs(res))
 
     def state_get(self):
