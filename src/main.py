@@ -2,13 +2,13 @@ import atexit
 import logging
 import signal
 import sys
-import time
 import traceback
 
 from devices.devices import create_ssr, create_DS18B20_all_thermometers
 from devices.devices_fake import create_fake_ssr, create_fake_thermostat, create_fake_static_thermostat
 from devices.errors import create_error_sensor
 from devices.hvac import create_hvac
+from devices.sensors import create_estimator
 from devices.thermometer import create_average_thermometer, create_weighted_average_thermometer
 from hass.components import Manager
 from hass.mqtt import Mqtt
@@ -53,14 +53,15 @@ def ssr_and_thermometers(mqtt, error_sensor):
                                                                                                             error_sensor)
 
 
-def run(m, h):
+def run(m, h, est):
     global RUN
     while RUN:
         try:
-            m.send_updates()
             h.apply_controller()
+            est.calculate_estimate(h)
             func_wrapper.clear()
-            #time.sleep(0.2)
+            m.send_updates()
+            # time.sleep(0.2)
         except:  # catch *all* exceptions
             traceback.print_exc(file=sys.stdout)
             kill()
@@ -92,6 +93,10 @@ if __name__ == "__main__":
         hvac = create_hvac(manager, ssr, therm_weight_avg)
         manager.add_component(hvac)
 
+        logging.info('Create target estimator')
+        est = create_estimator(manager)
+        manager.add_component(est)
+
         with manager:
             logging.info('Run controller')
-            run(manager, hvac)
+            run(manager, hvac, est)

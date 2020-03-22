@@ -134,7 +134,7 @@ class SettableSensor(Sensor):
         self.subscribe(self._TOPIC_CMD_SET, lambda new_state: self.state_set(self._format_state(new_state)))
 
     def _format_state(self, state):
-        state = int(state)
+        state = float(state)
         if state > self._max_val:
             return self._max_val
         elif state < self._min_val:
@@ -143,7 +143,7 @@ class SettableSensor(Sensor):
             return state
 
     def state_set(self, state):
-        if state != self._val:
+        if abs(state - self._val) < 1e-1:
             self._mqtt.publish(self._TOPIC_STATE, state)
         self._val = state
 

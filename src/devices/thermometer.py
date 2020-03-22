@@ -38,7 +38,7 @@ class Thermometer(Sensor):
 
 class ThermometerWeight(SettableSensor):
     def __init__(self, manager, name):
-        super().__init__(manager, name, 0, _get_weight(name, 75), 200)
+        super().__init__(manager, name, 0, _get_weight(name, 100), 200)
 
 
 class AverageThermometer(Sensor):
