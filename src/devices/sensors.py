@@ -60,56 +60,51 @@ class PidSensor:
 class EstimateTarget(Sensor):
     def __init__(self, manager, name):
         super().__init__(manager, name, 'minutes', 'mdi:clock')
-        self._est_array = []
-        self._est_array_size = 4
+        self._update_period = 60  # Every 30 sec
+        self._last_update_time = 0
+        self._last_update_temp = 0
         self._est = 0
-        self._sample_rate = 3
-        self._curr_interval = 0
-        self._reset()
 
     def _reset(self):
-        self._est_array = []
+        self._last_update_time = 0
+        self._last_update_temp = 0
         self._est = 999
-        self._curr_interval = 0
-
-    def _format_state(self, state):
-        return int(state)
 
     def calculate_estimate(self, hvac):
         if hvac.mode_get() == 'off':
             self._reset()
             return
 
-        if abs(hvac.target_get() - hvac.current_get()) < 1:
-            self._est = 0
+        new_temp = hvac.current_get()
+        target = hvac.target_get()
+
+        if abs(target - new_temp) < 1:
+            self._reset()
             return
 
-        self._curr_interval = self._curr_interval + 1
+        new_time = time.monotonic()
 
-        if not self._curr_interval > self._sample_rate:
+        if self._last_update_time == 0:
+            self._last_update_time = new_time
+            self._last_update_temp = new_temp
             return
 
-        self._curr_interval = 0
-
-        self._est_array.append((time.monotonic(), hvac.current_get()))
-
-        if len(self._est_array) < 2:
+        if (new_time - self._last_update_time) < self._update_period:
             return
 
-        if len(self._est_array) > self._est_array_size:
-            _, *tail = self._est_array
-            self._est_array = tail
+        temp_diff_left = target - new_temp
+        temp_diff_interval = new_temp - self._last_update_temp
+        temp_diff_time = new_time - self._last_update_time
 
-        res = 0
-        for i in range(0, len(self._est_array) - 1):
-            res += (self._est_array[i + 1][1] - self._est_array[i][1]) / (
-                    self._est_array[i + 1][0] - self._est_array[i][0])
-        res = res / (len(self._est_array) - 1) * 60
+        res = temp_diff_time / temp_diff_interval * temp_diff_left / 60
 
-        if res != 0:
-            res = (hvac.target_get() - hvac.current_get()) / res
+        self._last_update_time = new_time
+        self._last_update_temp = new_temp
 
         self._est = math.ceil(abs(res))
+
+    def _format_state(self, state):
+        return int(state)
 
     def state_get(self):
         return self._est
