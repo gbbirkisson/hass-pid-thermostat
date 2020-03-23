@@ -34,7 +34,7 @@ class Hvac(Climate):
         self._controller = None
 
         # Values that can change
-        self._pid_p = HvacValue(manager, 'p_gain', 0, 2.6, 10, lambda: self._handle_state_change())
+        self._pid_p = HvacValue(manager, 'p_gain', 0, 2.5, 10, lambda: self._handle_state_change())
         self._pid_i = HvacValue(manager, 'i_gain', 0, 0, 10, lambda: self._handle_state_change())
         self._pid_d = HvacValue(manager, 'd_gain', 0, 1, 10, lambda: self._handle_state_change())
         self._pid_output_limit = HvacValue(manager, 'output_limit', 1, 5, 20,

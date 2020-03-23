@@ -98,8 +98,8 @@ class EstimateTarget(Sensor):
 
         res = temp_diff_time / temp_diff_interval * temp_diff_left / 60
 
-        self._last_update_time = new_time
-        self._last_update_temp = new_temp
+        # self._last_update_time = new_time
+        # self._last_update_temp = new_temp
 
         self._est = int(math.ceil(abs(res)))
 
