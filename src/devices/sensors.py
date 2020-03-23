@@ -60,15 +60,15 @@ class PidSensor:
 class EstimateTarget(Sensor):
     def __init__(self, manager, name):
         super().__init__(manager, name, 'minutes', 'mdi:clock')
-        self._update_period = 60  # Every 30 sec
+        self._update_period = 60  # Every 60 sec
         self._last_update_time = 0
         self._last_update_temp = 0
-        self._est = 0
+        self._est = 'NaN'
 
     def _reset(self):
         self._last_update_time = 0
         self._last_update_temp = 0
-        self._est = 999
+        self._est = 'NaN'
 
     def calculate_estimate(self, hvac):
         if hvac.mode_get() == 'off':
@@ -79,7 +79,7 @@ class EstimateTarget(Sensor):
         target = hvac.target_get()
 
         if abs(target - new_temp) < 1:
-            self._reset()
+            self._est = 0
             return
 
         new_time = time.monotonic()
@@ -101,10 +101,10 @@ class EstimateTarget(Sensor):
         self._last_update_time = new_time
         self._last_update_temp = new_temp
 
-        self._est = math.ceil(abs(res))
+        self._est = int(math.ceil(abs(res)))
 
     def _format_state(self, state):
-        return int(state)
+        return state
 
     def state_get(self):
         return self._est
