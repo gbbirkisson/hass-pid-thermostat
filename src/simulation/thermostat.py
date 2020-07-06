@@ -5,8 +5,8 @@ from simulation.switch import fake_switch
 
 water_specific_heat = 4184  # 4184 watts will heat a 1L of water up by 1°C every second
 room_temperature = 9
-liters = 20
-boiler_watts = 2500
+liters = 45
+boiler_watts = 3000
 minutes_down_one_degree = 5
 
 
