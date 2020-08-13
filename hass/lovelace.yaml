@@ -5,17 +5,19 @@ views:
           - entity: climate.brew
             type: thermostat
           - entities:
+              - entity: sensor.brew_time_on_target
+              - entity: sensor.brew_percent_on
+              - entity: switch.brew_ssr
+              - entity: sensor.brew_errors
+              - entity: sensor.brew_temp_sensor_count
+              - entity: sensor.brew_last_update
+            type: entities
+          - entities:
               - entity: climate.brew
               - entity: sensor.brew_temp_average
             hours_to_show: 5
             refresh_interval: 10
             type: history-graph
-          - entities:
-              - entity: sensor.brew_percent_on
-              - entity: switch.brew_ssr
-              - entity: sensor.brew_minutes_to_target
-              - entity: sensor.brew_errors
-            type: entities
         title: Status
         type: vertical-stack
       - cards:
@@ -24,26 +26,30 @@ views:
               - entity: sensor.brew_temp_average
             type: entities
           - entities:
-              - entity: sensor.brew_temp_bottom
-              - entity: input_number.brew_temp_weight_bottom
-            type: entities
-          - entities:
               - entity: sensor.brew_temp_inner
-              - entity: input_number.brew_temp_weight_inner
+              - entity: input_number.brew_temp_inner_weight
             type: entities
           - entities:
               - entity: sensor.brew_temp_outer
-              - entity: input_number.brew_temp_weight_outer
+              - entity: input_number.brew_temp_outer_weight
+            type: entities
+          - entities:
+              - entity: sensor.brew_temp_bottom
+              - entity: input_number.brew_temp_bottom_weight
+            type: entities
+          - entities:
+              - entity: sensor.brew_temp_faucet
+              - entity: input_number.brew_temp_faucet_weight
             type: entities
         title: Thermometers
         type: vertical-stack
       - cards:
           - entities:
-              - entity: input_number.brew_p_gain
-              - entity: input_number.brew_i_gain
-              - entity: input_number.brew_d_gain
-              - entity: input_number.brew_output_limit
-              - entity: input_number.brew_sample_time
+              - entity: input_number.brew_pid_p_gain
+              - entity: input_number.brew_pid_i_gain
+              - entity: input_number.brew_pid_d_gain
+              - entity: input_number.brew_pid_output_limit
+              - entity: input_number.brew_pid_sample_time
             show_header_toggle: false
             type: entities
           - entities:

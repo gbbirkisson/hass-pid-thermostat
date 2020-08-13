@@ -3,8 +3,8 @@ import time
 
 from matplotlib import pyplot as plt
 
+from devices.devices_fake import create_ssr, temp_func
 from devices.pid import control_switch
-from simulation.thermostat import FakeThermostat
 
 seconds = 1.00
 
@@ -25,38 +25,23 @@ def sim_stats(*args):
     pass
 
 
-def create_simulator(pid, invert):
-    thermostat = FakeThermostat(invert=invert)
-    return control_switch(pid, thermostat.switch, thermostat.thermometers(), sim_stats)
-
-
-def heater_simulator(tg):
-    return create_simulator(PID(
-        2,
-        5,
-        1,
-        setpoint=tg,
-        sample_time=8,
-        output_limits=(0, 5)
-    ), False)
-
-
-def cooler_simulator(tg):
-    return create_simulator(PID(
-        2.6,
-        0,
-        1,
-        setpoint=tg,
-        sample_time=60,
-        output_limits=(-10, 0)
-    ), True)
+def create_simulator(pid):
+    return control_switch(pid, create_ssr(), temp_func, sim_stats)
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger('matplotlib').setLevel(logging.INFO)
     target = 70
-    sim = heater_simulator(target)
+
+    sim = create_simulator(PID(
+        2,
+        5,
+        1,
+        setpoint=target,
+        output_limits=(0, 5),
+        sample_time=8
+    ))
     # target = 14
     # sim = cooler_simulator(target)
     x = []

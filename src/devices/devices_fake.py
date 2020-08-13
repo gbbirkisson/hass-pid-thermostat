@@ -1,10 +1,9 @@
 import time
 
-# water_specific_heat = 4184  # 4184 watts will heat a 1L of water up by 1°C every second
-water_specific_heat = 3500
-room_temperature = 9
-liters = 20
-boiler_watts = 3000
+water_specific_heat = 4184  # 4184 watts will heat a 1L of water up by 1°C every second
+room_temperature = 15
+liters = 60
+boiler_watts = 4000
 minutes_down_one_degree = 5
 invert_constant = 1
 
@@ -26,7 +25,7 @@ class FakeTemp:
         return self._tempfunc()
 
 
-def _temp_func():
+def temp_func():
     global last_call, current_temp, on
 
     now = time.monotonic()
@@ -56,14 +55,14 @@ def _temp_func():
 
 def create_temp_sensors():
     return [
-        FakeTemp('outer', _temp_func),
+        FakeTemp('outer', temp_func),
         FakeTemp('inner', lambda: 40),
         FakeTemp('bottom', lambda: 60),
         FakeTemp('faucet', lambda: 80)
     ]
 
 
-def create_ssr():
+def create_ssr(error_sensor=None):
     def _set_state(s):
         global on
         on = s

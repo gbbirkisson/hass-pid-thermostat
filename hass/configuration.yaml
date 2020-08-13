@@ -1,204 +1,410 @@
-input_number:
-  brew_temp_weight_bottom:
-    name: Weight
-    min: 0
-    max: 200
-    step: 1
-    icon: mdi:weight
-  brew_temp_weight_inner:
-    name: Weight
-    min: 0
-    max: 200
-    step: 1
-    icon: mdi:weight
-  brew_temp_weight_outer:
-    name: Weight
-    min: 0
-    max: 200
-    step: 1
-    icon: mdi:weight
-  brew_p_gain:
-    name: P
-    min: 0
-    max: 10
-    step: 0.1
-    icon: mdi:tune
-  brew_i_gain:
-    name: I
-    min: 0
-    max: 10
-    step: 0.1
-    icon: mdi:tune
-  brew_d_gain:
-    name: D
-    min: 0
-    max: 10
-    step: 0.1
-    icon: mdi:tune
-  brew_output_limit:
-    name: Out Limit
-    min: 0
-    max: 20
-    step: 1
-    icon: mdi:tune
-  brew_sample_time:
-    name: Time
-    min: 0
-    max: 600
-    step: 1
-    icon: mdi:tune
-
-
 automation:
-  - alias: brew_weight_bottom_1
-    trigger:
-      platform: mqtt
-      topic: 'homeassistant/sensor/brew_weight_bottom/state'
-    action:
-      service: input_number.set_value
-      data_template:
-        entity_id: input_number.brew_temp_weight_bottom
-        value: "{{ trigger.payload }}"
-  - alias: brew_weight_bottom_2
-    trigger:
-      platform: state
-      entity_id: input_number.brew_temp_weight_bottom
-    action:
-      service: mqtt.publish
-      data_template:
-        topic: 'homeassistant/sensor/brew_weight_bottom/cmdSet'
-        retain: true
-        payload: "{{ states('input_number.brew_temp_weight_bottom') | int }}"
-  - alias: brew_weight_inner_1
-    trigger:
-      platform: mqtt
-      topic: 'homeassistant/sensor/brew_weight_inner/state'
-    action:
-      service: input_number.set_value
-      data_template:
-        entity_id: input_number.brew_temp_weight_inner
-        value: "{{ trigger.payload }}"
-  - alias: brew_weight_inner_2
-    trigger:
-      platform: state
-      entity_id: input_number.brew_temp_weight_inner
-    action:
-      service: mqtt.publish
-      data_template:
-        topic: 'homeassistant/sensor/brew_weight_inner/cmdSet'
-        retain: true
-        payload: "{{ states('input_number.brew_temp_weight_inner') | int }}"
-  - alias: brew_weight_outer_1
-    trigger:
-      platform: mqtt
-      topic: 'homeassistant/sensor/brew_weight_outer/state'
-    action:
-      service: input_number.set_value
-      data_template:
-        entity_id: input_number.brew_temp_weight_outer
-        value: "{{ trigger.payload }}"
-  - alias: brew_weight_outer_2
-    trigger:
-      platform: state
-      entity_id: input_number.brew_temp_weight_outer
-    action:
-      service: mqtt.publish
-      data_template:
-        topic: 'homeassistant/sensor/brew_weight_outer/cmdSet'
-        retain: true
-        payload: "{{ states('input_number.brew_temp_weight_outer') | int }}"
-  - alias: brew_p_gain_1
-    trigger:
-      platform: mqtt
-      topic: 'homeassistant/sensor/brew_p_gain/state'
-    action:
-      service: input_number.set_value
-      data_template:
-        entity_id: input_number.brew_p_gain
-        value: "{{ trigger.payload }}"
-  - alias: brew_p_gain_2
-    trigger:
-      platform: state
-      entity_id: input_number.brew_p_gain
-    action:
-      service: mqtt.publish
-      data_template:
-        topic: 'homeassistant/sensor/brew_p_gain/cmdSet'
-        retain: true
-        payload: "{{ states('input_number.brew_p_gain') | float }}"
-  - alias: brew_i_gain_1
-    trigger:
-      platform: mqtt
-      topic: 'homeassistant/sensor/brew_i_gain/state'
-    action:
-      service: input_number.set_value
-      data_template:
-        entity_id: input_number.brew_i_gain
-        value: "{{ trigger.payload }}"
-  - alias: brew_i_gain_2
-    trigger:
-      platform: state
-      entity_id: input_number.brew_i_gain
-    action:
-      service: mqtt.publish
-      data_template:
-        topic: 'homeassistant/sensor/brew_i_gain/cmdSet'
-        retain: true
-        payload: "{{ states('input_number.brew_i_gain') | float }}"
-  - alias: brew_d_gain_1
-    trigger:
-      platform: mqtt
-      topic: 'homeassistant/sensor/brew_d_gain/state'
-    action:
-      service: input_number.set_value
-      data_template:
-        entity_id: input_number.brew_d_gain
-        value: "{{ trigger.payload }}"
-  - alias: brew_d_gain_2
-    trigger:
-      platform: state
-      entity_id: input_number.brew_d_gain
-    action:
-      service: mqtt.publish
-      data_template:
-        topic: 'homeassistant/sensor/brew_d_gain/cmdSet'
-        retain: true
-        payload: "{{ states('input_number.brew_d_gain') | float }}"
-  - alias: brew_output_limit_1
-    trigger:
-      platform: mqtt
-      topic: 'homeassistant/sensor/brew_output_limit/state'
-    action:
-      service: input_number.set_value
-      data_template:
-        entity_id: input_number.brew_output_limit
-        value: "{{ trigger.payload }}"
-  - alias: brew_output_limit_2
-    trigger:
-      platform: state
-      entity_id: input_number.brew_output_limit
-    action:
-      service: mqtt.publish
-      data_template:
-        topic: 'homeassistant/sensor/brew_output_limit/cmdSet'
-        retain: true
-        payload: "{{ states('input_number.brew_output_limit') | int }}"
-  - alias: brew_sample_time_1
-    trigger:
-      platform: mqtt
-      topic: 'homeassistant/sensor/brew_sample_time/state'
-    action:
-      service: input_number.set_value
-      data_template:
-        entity_id: input_number.brew_sample_time
-        value: "{{ trigger.payload }}"
-  - alias: brew_sample_time_2
-    trigger:
-      platform: state
-      entity_id: input_number.brew_sample_time
-    action:
-      service: mqtt.publish
-      data_template:
-        topic: 'homeassistant/sensor/brew_sample_time/cmdSet'
-        retain: true
-        payload: "{{ states('input_number.brew_sample_time') | int }}"
+- action:
+    data_template:
+      entity_id: input_number.brew_temp_outer_weight
+      value: '{{ trigger.payload }}'
+    service: input_number.set_value
+  alias: brew_temp_outer_weight_1
+  trigger:
+    platform: mqtt
+    topic: homeassistant/sensor/brew_temp_outer_weight/state
+- action:
+    data_template:
+      payload: '{{ states(''input_number.brew_temp_outer_weight'') | int }}'
+      topic: homeassistant/sensor/brew_temp_outer_weight/cmd
+    service: mqtt.publish
+  alias: brew_temp_outer_weight_2
+  trigger:
+    entity_id: input_number.brew_temp_outer_weight
+    platform: state
+- action:
+    data_template:
+      entity_id: input_number.brew_temp_inner_weight
+      value: '{{ trigger.payload }}'
+    service: input_number.set_value
+  alias: brew_temp_inner_weight_1
+  trigger:
+    platform: mqtt
+    topic: homeassistant/sensor/brew_temp_inner_weight/state
+- action:
+    data_template:
+      payload: '{{ states(''input_number.brew_temp_inner_weight'') | int }}'
+      topic: homeassistant/sensor/brew_temp_inner_weight/cmd
+    service: mqtt.publish
+  alias: brew_temp_inner_weight_2
+  trigger:
+    entity_id: input_number.brew_temp_inner_weight
+    platform: state
+- action:
+    data_template:
+      entity_id: input_number.brew_temp_bottom_weight
+      value: '{{ trigger.payload }}'
+    service: input_number.set_value
+  alias: brew_temp_bottom_weight_1
+  trigger:
+    platform: mqtt
+    topic: homeassistant/sensor/brew_temp_bottom_weight/state
+- action:
+    data_template:
+      payload: '{{ states(''input_number.brew_temp_bottom_weight'') | int }}'
+      topic: homeassistant/sensor/brew_temp_bottom_weight/cmd
+    service: mqtt.publish
+  alias: brew_temp_bottom_weight_2
+  trigger:
+    entity_id: input_number.brew_temp_bottom_weight
+    platform: state
+- action:
+    data_template:
+      entity_id: input_number.brew_temp_faucet_weight
+      value: '{{ trigger.payload }}'
+    service: input_number.set_value
+  alias: brew_temp_faucet_weight_1
+  trigger:
+    platform: mqtt
+    topic: homeassistant/sensor/brew_temp_faucet_weight/state
+- action:
+    data_template:
+      payload: '{{ states(''input_number.brew_temp_faucet_weight'') | int }}'
+      topic: homeassistant/sensor/brew_temp_faucet_weight/cmd
+    service: mqtt.publish
+  alias: brew_temp_faucet_weight_2
+  trigger:
+    entity_id: input_number.brew_temp_faucet_weight
+    platform: state
+- action:
+    data_template:
+      entity_id: input_number.brew_pid_p_gain
+      value: '{{ trigger.payload }}'
+    service: input_number.set_value
+  alias: brew_pid_p_gain_1
+  trigger:
+    platform: mqtt
+    topic: homeassistant/sensor/brew_pid_p_gain/state
+- action:
+    data_template:
+      payload: '{{ states(''input_number.brew_pid_p_gain'') | float }}'
+      topic: homeassistant/sensor/brew_pid_p_gain/cmd
+    service: mqtt.publish
+  alias: brew_pid_p_gain_2
+  trigger:
+    entity_id: input_number.brew_pid_p_gain
+    platform: state
+- action:
+    data_template:
+      entity_id: input_number.brew_pid_i_gain
+      value: '{{ trigger.payload }}'
+    service: input_number.set_value
+  alias: brew_pid_i_gain_1
+  trigger:
+    platform: mqtt
+    topic: homeassistant/sensor/brew_pid_i_gain/state
+- action:
+    data_template:
+      payload: '{{ states(''input_number.brew_pid_i_gain'') | float }}'
+      topic: homeassistant/sensor/brew_pid_i_gain/cmd
+    service: mqtt.publish
+  alias: brew_pid_i_gain_2
+  trigger:
+    entity_id: input_number.brew_pid_i_gain
+    platform: state
+- action:
+    data_template:
+      entity_id: input_number.brew_pid_d_gain
+      value: '{{ trigger.payload }}'
+    service: input_number.set_value
+  alias: brew_pid_d_gain_1
+  trigger:
+    platform: mqtt
+    topic: homeassistant/sensor/brew_pid_d_gain/state
+- action:
+    data_template:
+      payload: '{{ states(''input_number.brew_pid_d_gain'') | float }}'
+      topic: homeassistant/sensor/brew_pid_d_gain/cmd
+    service: mqtt.publish
+  alias: brew_pid_d_gain_2
+  trigger:
+    entity_id: input_number.brew_pid_d_gain
+    platform: state
+- action:
+    data_template:
+      entity_id: input_number.brew_pid_output_limit
+      value: '{{ trigger.payload }}'
+    service: input_number.set_value
+  alias: brew_pid_output_limit_1
+  trigger:
+    platform: mqtt
+    topic: homeassistant/sensor/brew_pid_output_limit/state
+- action:
+    data_template:
+      payload: '{{ states(''input_number.brew_pid_output_limit'') | int }}'
+      topic: homeassistant/sensor/brew_pid_output_limit/cmd
+    service: mqtt.publish
+  alias: brew_pid_output_limit_2
+  trigger:
+    entity_id: input_number.brew_pid_output_limit
+    platform: state
+- action:
+    data_template:
+      entity_id: input_number.brew_pid_sample_time
+      value: '{{ trigger.payload }}'
+    service: input_number.set_value
+  alias: brew_pid_sample_time_1
+  trigger:
+    platform: mqtt
+    topic: homeassistant/sensor/brew_pid_sample_time/state
+- action:
+    data_template:
+      payload: '{{ states(''input_number.brew_pid_sample_time'') | int }}'
+      topic: homeassistant/sensor/brew_pid_sample_time/cmd
+    service: mqtt.publish
+  alias: brew_pid_sample_time_2
+  trigger:
+    entity_id: input_number.brew_pid_sample_time
+    platform: state
+climate:
+- current_temperature_topic: homeassistant/climate/brew/stateCurrTemp
+  max_temp: '100'
+  min_temp: '0'
+  mode_command_topic: homeassistant/climate/brew/cmdMode
+  mode_state_topic: homeassistant/climate/brew/stateMode
+  modes:
+  - 'off'
+  - heat
+  name: Brew
+  platform: mqtt
+  temp_step: '1'
+  temperature_command_topic: homeassistant/climate/brew/cmdTargetTemp
+  temperature_state_topic: homeassistant/climate/brew/stateTargetTemp
+  unique_id: brew
+input_number:
+  brew_pid_d_gain:
+    icon: mdi:cursor-move
+    initial: 1
+    max: 10
+    min: 0
+    name: D
+    step: 0.1
+    unit_of_measurement: ''
+  brew_pid_i_gain:
+    icon: mdi:cursor-move
+    initial: 5
+    max: 10
+    min: 0
+    name: I
+    step: 0.1
+    unit_of_measurement: ''
+  brew_pid_output_limit:
+    icon: mdi:cursor-move
+    initial: 5
+    max: 10
+    min: 0
+    name: Out Limit
+    step: 1
+    unit_of_measurement: ''
+  brew_pid_p_gain:
+    icon: mdi:cursor-move
+    initial: 2
+    max: 10
+    min: 0
+    name: P
+    step: 0.1
+    unit_of_measurement: ''
+  brew_pid_sample_time:
+    icon: mdi:cursor-move
+    initial: 8
+    max: 10
+    min: 0
+    name: Time
+    step: 1
+    unit_of_measurement: ''
+  brew_temp_bottom_weight:
+    icon: mdi:weight
+    initial: 50
+    max: 100
+    min: 0
+    name: Brew Temp bottom weight
+    step: 1
+    unit_of_measurement: ''
+  brew_temp_faucet_weight:
+    icon: mdi:weight
+    initial: 50
+    max: 100
+    min: 0
+    name: Brew Temp faucet weight
+    step: 1
+    unit_of_measurement: ''
+  brew_temp_inner_weight:
+    icon: mdi:weight
+    initial: 50
+    max: 100
+    min: 0
+    name: Brew Temp inner weight
+    step: 1
+    unit_of_measurement: ''
+  brew_temp_outer_weight:
+    icon: mdi:weight
+    initial: 50
+    max: 100
+    min: 0
+    name: Brew Temp outer weight
+    step: 1
+    unit_of_measurement: ''
+sensor:
+- icon: mdi:alarm-light
+  name: Brew Errors
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_errors
+  unit_of_measurement: errors
+  value_template: '{{ value_json.brew_errors }}'
+- device_class: timestamp
+  icon: mdi:clock
+  name: Brew Last Update
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_last_update
+  unit_of_measurement: ''
+  value_template: '{{ value_json.brew_last_update }}'
+- name: Brew Temp outer
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_temp_outer
+  unit_of_measurement: °C
+  value_template: '{{ value_json.brew_temp_outer }}'
+- name: Brew Temp inner
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_temp_inner
+  unit_of_measurement: °C
+  value_template: '{{ value_json.brew_temp_inner }}'
+- name: Brew Temp bottom
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_temp_bottom
+  unit_of_measurement: °C
+  value_template: '{{ value_json.brew_temp_bottom }}'
+- name: Brew Temp faucet
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_temp_faucet
+  unit_of_measurement: °C
+  value_template: '{{ value_json.brew_temp_faucet }}'
+- icon: mdi:magnify-plus
+  name: Brew Temp Sensor Count
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_temp_sensor_count
+  unit_of_measurement: ''
+  value_template: '{{ value_json.brew_temp_sensor_count }}'
+- icon: mdi:thermometer-lines
+  name: Brew Temp Average
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_temp_average
+  unit_of_measurement: °C
+  value_template: '{{ value_json.brew_temp_average }}'
+- icon: mdi:thermometer-lines
+  name: Brew Temp Average Weighted
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_temp_average_weighted
+  unit_of_measurement: °C
+  value_template: '{{ value_json.brew_temp_average_weighted }}'
+- icon: mdi:weight
+  name: Brew Temp outer weight
+  platform: mqtt
+  state_topic: homeassistant/sensor/brew_temp_outer_weight/state
+  unique_id: brew_temp_outer_weight
+  unit_of_measurement: ''
+- icon: mdi:weight
+  name: Brew Temp inner weight
+  platform: mqtt
+  state_topic: homeassistant/sensor/brew_temp_inner_weight/state
+  unique_id: brew_temp_inner_weight
+  unit_of_measurement: ''
+- icon: mdi:weight
+  name: Brew Temp bottom weight
+  platform: mqtt
+  state_topic: homeassistant/sensor/brew_temp_bottom_weight/state
+  unique_id: brew_temp_bottom_weight
+  unit_of_measurement: ''
+- icon: mdi:weight
+  name: Brew Temp faucet weight
+  platform: mqtt
+  state_topic: homeassistant/sensor/brew_temp_faucet_weight/state
+  unique_id: brew_temp_faucet_weight
+  unit_of_measurement: ''
+- name: Brew P
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_pid_p
+  unit_of_measurement: ' '
+  value_template: '{{ value_json.brew_pid_p }}'
+- name: Brew I
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_pid_i
+  unit_of_measurement: ' '
+  value_template: '{{ value_json.brew_pid_i }}'
+- name: Brew D
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_pid_d
+  unit_of_measurement: ' '
+  value_template: '{{ value_json.brew_pid_d }}'
+- icon: mdi:power-socket-eu
+  name: Brew Percent On
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_percent_on
+  unit_of_measurement: '%'
+  value_template: '{{ value_json.brew_percent_on }}'
+- icon: mdi:cursor-move
+  name: P
+  platform: mqtt
+  state_topic: homeassistant/sensor/brew_pid_p_gain/state
+  unique_id: brew_pid_p_gain
+  unit_of_measurement: ''
+- icon: mdi:cursor-move
+  name: I
+  platform: mqtt
+  state_topic: homeassistant/sensor/brew_pid_i_gain/state
+  unique_id: brew_pid_i_gain
+  unit_of_measurement: ''
+- icon: mdi:cursor-move
+  name: D
+  platform: mqtt
+  state_topic: homeassistant/sensor/brew_pid_d_gain/state
+  unique_id: brew_pid_d_gain
+  unit_of_measurement: ''
+- icon: mdi:cursor-move
+  name: Out Limit
+  platform: mqtt
+  state_topic: homeassistant/sensor/brew_pid_output_limit/state
+  unique_id: brew_pid_output_limit
+  unit_of_measurement: ''
+- icon: mdi:cursor-move
+  name: Time
+  platform: mqtt
+  state_topic: homeassistant/sensor/brew_pid_sample_time/state
+  unique_id: brew_pid_sample_time
+  unit_of_measurement: ''
+- device_class: timestamp
+  icon: mdi:clock
+  name: Brew Time On Target
+  platform: mqtt
+  state_topic: /brew_state
+  unique_id: brew_time_on_target
+  unit_of_measurement: ''
+  value_template: '{{ value_json.brew_time_on_target }}'
+switch:
+- command_topic: homeassistant/switch/brew_ssr/cmd
+  name: Brew SSR
+  payload_off: 'off'
+  payload_on: 'on'
+  platform: mqtt
+  state_off: 'off'
+  state_on: 'on'
+  state_topic: /brew_state
+  unique_id: brew_ssr
+  value_template: '{{ value_json.brew_ssr }}'

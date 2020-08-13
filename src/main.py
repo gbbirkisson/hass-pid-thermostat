@@ -16,8 +16,7 @@ from pid import Pid, PidSensor, TimeOnTarget
 if env_bool('SIMULATE', False):
     from devices.devices_fake import create_ssr, create_temp_sensors
 else:
-    # TODO: add the real thing
-    pass
+    from devices.devices import create_ssr, create_temp_sensors
 
 
 def with_prefix(s=None):
@@ -91,9 +90,9 @@ def create_components(mqtt_broker):
         with_prefix('Temp Average Weighted'),
         '°C',
         0,
-        200,
-        1,
         100,
+        1,
+        50,
         ha_sensors,
         icon='mdi:thermometer-lines',
         **standard_config
@@ -102,7 +101,7 @@ def create_components(mqtt_broker):
     reg.add_component(weights, send_updates=False)
 
     # Create SSR
-    ssr = Switch(with_prefix('SSR'), state_change_func=create_ssr(), **standard_config)
+    ssr = Switch(with_prefix('SSR'), state_change_func=create_ssr(errors), **standard_config)
     reg.add_component(ssr)
 
     # Create PID sensor

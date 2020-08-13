@@ -26,10 +26,10 @@ class Pid:
             thermometer,
             ssr,
             pid_sensor,
-            p=env_float('PID_P_GAIN', 2.6),
-            i=env_float('PID_I_GAIN', 0),
+            p=env_float('PID_P_GAIN', 2),
+            i=env_float('PID_I_GAIN', 5),
             d=env_float('PID_D_GAIN', 1),
-            output_limit=env_float('PID_OUTPUT_LIMIT', 10),
+            output_limit=env_float('PID_OUTPUT_LIMIT', 5),
             sample_time=env_float('PID_SAMPLE_TIME', 8)
     ):
         self._thermometer = thermometer
