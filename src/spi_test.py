@@ -59,13 +59,28 @@ signal.signal(signal.SIGINT, kill)
 signal.signal(signal.SIGTERM, kill)
 atexit.register(kill)
 
+d = 0
+c = 0
+
 if __name__ == "__main__":
     while RUN:
+        print("dev {} chan {}".format(d, c))
         try:
             # read channel 0 on device 0
             value = readAnalog(1, 0)
             print(value)
+            print("")
             time.sleep(5)
         except:
             traceback.print_exc()
             exit(1)
+        if c == 0:
+            c = 1
+            continue
+        if d == 0:
+            d = 1
+            continue
+        if c == 1 and d == 1:
+            c = 0
+            d = 0
+            continue
