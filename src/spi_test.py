@@ -2,7 +2,7 @@ import time
 
 import spidev
 
-spi_ch = 1
+spi_ch = 0
 
 # Enable SPI
 spi = spidev.SpiDev(0, spi_ch)
@@ -33,15 +33,11 @@ def read_adc(adc_ch, vref=3.3):
     # Last bit (0) is not part of ADC value, shift to remove it
     adc = adc >> 1
 
-    # Calculate voltage form ADC value
-    voltage = (vref * adc) / 1024
-
-    return voltage
+    return adc
 
 
 # Report the channel 0 and channel 1 voltages to the terminal
 while True:
     adc_0 = read_adc(0)
-    adc_1 = read_adc(1)
-    print("Ch 0:", round(adc_0, 2), "V Ch 1:", round(adc_1, 2), "V")
-    time.sleep(1)
+    print("Ch 0:", adc_0)
+    time.sleep(2)
