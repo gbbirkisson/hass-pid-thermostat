@@ -79,6 +79,7 @@ if __name__ == "__main__":
             continue
         if d == 0:
             d = 1
+            c = 0
             continue
         if c == 1 and d == 1:
             c = 0
