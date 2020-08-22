@@ -2,7 +2,7 @@ import time
 
 import spidev
 
-spi_ch = 0
+spi_ch = 1
 
 # Enable SPI
 spi = spidev.SpiDev(0, spi_ch)
