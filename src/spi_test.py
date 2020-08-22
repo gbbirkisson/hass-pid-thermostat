@@ -63,7 +63,7 @@ if __name__ == "__main__":
     while RUN:
         try:
             # read channel 0 on device 0
-            value = readAnalog(0, 0)
+            value = readAnalog(1, 0)
             print(value)
             time.sleep(5)
         except:
