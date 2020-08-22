@@ -41,7 +41,7 @@ def read_adc(adc_ch, vref=3.3):
 while True:
     adc_0 = read_adc(0)
     rV = (1024.0 / adc_0 - 1) * 1000.0
-    tempK = 1 / (9.6564E-04 + (2.1069E-04 * math.log(rV)) + (8.5826E-08 * math.pow(math.Log(rV), 3)))
+    tempK = 1 / (9.6564E-04 + (2.1069E-04 * math.log(rV)) + (8.5826E-08 * math.pow(math.log(rV), 3)))
     tempC = tempK - 273.15
     print("Ch 0:", adc_0, "Temp:", tempC)
     time.sleep(2)
