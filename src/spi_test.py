@@ -46,8 +46,7 @@ def readAnalog(device=0, channel=0):
 def main():
     # read channel 0 on device 0
     value = readAnalog(0, 0)
-    print
-    value
+    print(value)
     time.sleep(10)
 
 
