@@ -1,3 +1,4 @@
+import math
 import time
 
 import spidev
@@ -39,5 +40,14 @@ def read_adc(adc_ch, vref=3.3):
 # Report the channel 0 and channel 1 voltages to the terminal
 while True:
     adc_0 = read_adc(0)
-    print("Ch 0:", adc_0)
+    rV = (1024.0 / adc_0 - 1) * 1000.0
+    tempK = 1 / (9.6564E-04 + (2.1069E-04 * math.log(rV)) + (8.5826E-08 * math.pow(math.Log(rV), 3)))
+    tempC = tempK - 273.15
+    print("Ch 0:", adc_0, "Temp:", tempC)
     time.sleep(2)
+
+# double rV = ((1024D/adcValue) - 1D)*1000D;
+# //Steinhart-HartEquation inverted
+#
+# double tempK = 1/(9.6564E-04 + (2.1069E-04*Math.Log(rV)) + (8.5826E-08*Math.Pow(Math.Log(rV), 3)));
+#  double tempC = tempK - 273.15;
