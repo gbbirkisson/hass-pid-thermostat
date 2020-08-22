@@ -1,87 +1,47 @@
-import atexit
-import signal
 import time
-import traceback
 
 import spidev
 
+spi_ch = 0
 
-def readAnalog(device=0, channel=0):
-    assert device in (1, 0)
-    assert channel in (1, 0)
-    # open spi
-    spi = spidev.SpiDev()
-    spi.open(0, device)
-    """
-    Protocol start bit (S), sql/diff (D), odd/sign (C), MSBF (M)
-    Use leading zero for more stable clock cycle
-    0000 000S DCM0 0000 0000 0000
-    Sending 3 8bit packages so xpi.xfer2 will return the same amount.
-    start bit = 1
-    sql/diff = 1 SINGLE ENDED MODE  (2 channel mode) 
-    odd/sign = channel 0/1
-    MSBF = 0
-    """
-    command = [1, (2 + channel) << 6, 0]
-    # 2 + channel shifted 6 to left
-    # 10 or 11 << 6 = 1000 0000 or 1100 0000
-    reply = spi.xfer2(command)
-    print(reply)
-    """
-    Parse right bits from 24 bit package (3*8bit)
-    We need only data from last 2 bytes.
-    And there we can discard last two bits to get 10 bit value 
-    as MCP3002 resolution is 10bits
-    Discard reply[0] byte and start from reply[1] where our data starts
-    """
-    value = reply[1] & 31
-    # 31 = 0001 1111 with & operation makes sure that we have all data from XXXX DDDD and nothing more. 0001 is for signed in next operation.
-    value = value << 6  # Move to left to make room for next piece of data.
-    # 000D DDDD << 6 = 0DDD DD00 0000
-    # Now we get the last of data from reply[2]
-    value = value + (reply[2] >> 2)
-    # Here we discard last to bits
-    # DDDD DDXXX >> 2 = 00DD DDDD
-    # 0DDD DD00 0000 + 00DD DDDD = 0DDD DDDD DDDD
-    spi.close()
-    return value
+# Enable SPI
+spi = spidev.SpiDev(0, spi_ch)
+spi.max_speed_hz = 1200000
 
 
-RUN = True
+def read_adc(adc_ch, vref=3.3):
+    # Make sure ADC channel is 0 or 1
+    if adc_ch != 0:
+        adc_ch = 1
+
+    # Construct SPI message
+    #  First bit (Start): Logic high (1)
+    #  Second bit (SGL/DIFF): 1 to select single mode
+    #  Third bit (ODD/SIGN): Select channel (0 or 1)
+    #  Fourth bit (MSFB): 0 for LSB first
+    #  Next 12 bits: 0 (don't care)
+    msg = 0b11
+    msg = ((msg << 1) + adc_ch) << 5
+    msg = [msg, 0b00000000]
+    reply = spi.xfer2(msg)
+
+    # Construct single integer out of the reply (2 bytes)
+    adc = 0
+    for n in reply:
+        adc = (adc << 8) + n
+
+    # Last bit (0) is not part of ADC value, shift to remove it
+    adc = adc >> 1
+
+    # Calculate voltage form ADC value
+    voltage = (vref * adc) / 1024
+
+    return voltage
 
 
-def kill(*args):
-    global RUN
-    RUN = False
-
-
-signal.signal(signal.SIGINT, kill)
-signal.signal(signal.SIGTERM, kill)
-atexit.register(kill)
-
-d = 0
-c = 0
-
-if __name__ == "__main__":
-    while RUN:
-        print("dev {} chan {}".format(d, c))
-        try:
-            # read channel 0 on device 0
-            value = readAnalog(1, 0)
-            print(value)
-            print("")
-            time.sleep(5)
-        except:
-            traceback.print_exc()
-            exit(1)
-        if c == 0:
-            c = 1
-            continue
-        if d == 0:
-            d = 1
-            c = 0
-            continue
-        if c == 1 and d == 1:
-            c = 0
-            d = 0
-            continue
+# Report the channel 0 and channel 1 voltages to the terminal
+while True:
+    adc_0 = read_adc(0)
+    adc_1 = read_adc(1)
+    print("Ch 0:", round(adc_0, 2), "V Ch 1:", round(adc_1, 2), "V")
+    time.sleep(1)
