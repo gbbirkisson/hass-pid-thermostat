@@ -1,10 +1,11 @@
 FROM balenalib/%%BALENA_MACHINE_NAME%%-python:3
 
 # Install requirements only first to cache
-RUN apt-get update && apt-get install -y git && \
-    rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt && rm /tmp/*
+RUN apt-get update && apt-get install -y git build-essential && \
+    pip install -r /tmp/requirements.txt && rm /tmp/* && \
+    apt-get remove git build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /hass
 COPY ./src ./
