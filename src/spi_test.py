@@ -1,4 +1,7 @@
+import atexit
+import signal
 import time
+import traceback
 
 import spidev
 
@@ -23,6 +26,7 @@ def readAnalog(device=0, channel=0):
     # 2 + channel shifted 6 to left
     # 10 or 11 << 6 = 1000 0000 or 1100 0000
     reply = spi.xfer2(command)
+    print(reply)
     """
     Parse right bits from 24 bit package (3*8bit)
     We need only data from last 2 bytes.
@@ -43,12 +47,25 @@ def readAnalog(device=0, channel=0):
     return value
 
 
-def main():
-    # read channel 0 on device 0
-    value = readAnalog(0, 0)
-    print(value)
-    time.sleep(10)
+RUN = True
 
+
+def kill(*args):
+    global RUN
+    RUN = False
+
+
+signal.signal(signal.SIGINT, kill)
+signal.signal(signal.SIGTERM, kill)
+atexit.register(kill)
 
 if __name__ == "__main__":
-    main()
+    while RUN:
+        try:
+            # read channel 0 on device 0
+            value = readAnalog(0, 0)
+            print(value)
+            time.sleep(5)
+        except:
+            traceback.print_exc()
+            exit(1)
