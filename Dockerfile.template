@@ -1,4 +1,4 @@
-FROM balenalib/%%BALENA_MACHINE_NAME%%-python:3
+FROM balenalib/%%BALENA_MACHINE_NAME%%-python:latest
 
 # Install requirements only first to cache
 COPY requirements.txt /tmp/requirements.txt
