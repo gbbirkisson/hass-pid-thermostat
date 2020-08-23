@@ -80,6 +80,7 @@ else:
     ds = None
 
 while True:
+    print("loop")
     # t = spi.get_temperature()
     # a = spi.get_adc()
     # print("Name:", spi.get_id(), "Ch 0:", a, "Temp:", t)
