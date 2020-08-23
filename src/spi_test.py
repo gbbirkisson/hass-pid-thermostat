@@ -38,6 +38,27 @@ def read_adc(adc_ch, vref=3.3):
     return adc
 
 
+def get_adc(channel):
+    # Only 2 channels 0 and 1 else return -1
+    if ((channel > 1) or (channel < 0)):
+        return -1
+
+    # Send start bit, sgl/diff, odd/sign, MSBF
+    # channel = 0 sends 0000 0001 1000 0000 0000 0000
+    # channel = 1 sends 0000 0001 1100 0000 0000 0000
+    # sgl/diff = 1; odd/sign = channel; MSBF = 0
+    r = spi.xfer2([1, (2 + channel) << 6, 0])
+
+    # spi.xfer2 returns same number of 8 bit bytes
+    # as sent. In this case, 3 - 8 bit bytes are returned
+    # We must then parse out the correct 10 bit byte from
+    # the 24 bits returned. The following line discards
+    # all bits but the 10 data bits from the center of
+    # the last 2 bytes: XXXX XXXX - XXXX DDDD - DDDD DDXX
+    ret = ((r[1] & 31) << 6) + (r[2] >> 2)
+    return ret
+
+
 # https://www.thinksrs.com/downloads/programs/therm%20calc/ntccalibrator/ntccalculator.html
 # //Steinhart-Hart model coefficients
 sha = 2.114990448E-03
@@ -46,7 +67,7 @@ shc = 5.228061052E-07
 
 # Report the channel 0 and channel 1 voltages to the terminal
 while True:
-    adc_0 = read_adc(0)
+    adc_0 = get_adc(0)
     rV = (1024.0 / adc_0 - 1) * 1000.0
     tempK = 1 / (sha + (shb * math.log(rV)) + (shc * math.pow(math.log(rV), 3)))
     tempC = tempK - 273.15
