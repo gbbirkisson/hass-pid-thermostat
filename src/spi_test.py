@@ -68,7 +68,7 @@ shc = 5.228061052E-07
 # Report the channel 0 and channel 1 voltages to the terminal
 while True:
     adc_0 = get_adc(0)
-    rV = (1024.0 / adc_0 - 1) * 1000.0
+    rV = (1024.0 / adc_0 - 1) * 10000.0
     tempK = 1 / (sha + (shb * math.log(rV)) + (shc * math.pow(math.log(rV), 3)))
     tempC = tempK - 273.15
     print("Ch 0:", adc_0, "Temp:", tempC)
