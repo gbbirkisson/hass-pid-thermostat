@@ -70,7 +70,7 @@ from devices.spi import SpiTempSensor
 # # https://www.hackster.io/ahmartareen/iot-temperature-sensor-with-raspberry-pi-2-and-thermistor-7e12db
 # aux_res = 10000.0
 
-# spi = SpiTempSensor()
+spi = SpiTempSensor()
 
 ds = DS18B20.get_available_sensors()
 
@@ -81,11 +81,12 @@ else:
 
 while True:
     print("loop")
-    # t = spi.get_temperature()
-    # a = spi.get_adc()
-    # print("Name:", spi.get_id(), "Ch 0:", a, "Temp:", t)
     if ds is not None:
         print("Name:", ds.get_id(), "Temp:", ds.get_temperature())
+
+    t = spi.get_temperature()
+    a = spi.get_adc()
+    print("Name:", spi.get_id(), "Ch 0:", a, "Temp:", t)
 
     time.sleep(1)
 
