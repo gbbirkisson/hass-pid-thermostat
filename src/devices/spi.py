@@ -53,4 +53,4 @@ class SpiTempSensor:
         return temp_kelvin - 273.15
 
     def get_id(self):
-        return 'MCP3002_%d'.format(self._channel)
+        return 'MCP3002_{}'.format(self._channel)

@@ -1,5 +1,7 @@
 import time
 
+from ds18b20 import DS18B20
+
 from devices.spi import SpiTempSensor
 
 # spi_ch = 0
@@ -68,11 +70,23 @@ from devices.spi import SpiTempSensor
 # # https://www.hackster.io/ahmartareen/iot-temperature-sensor-with-raspberry-pi-2-and-thermistor-7e12db
 # aux_res = 10000.0
 
-temp = SpiTempSensor()
+spi = SpiTempSensor()
+
+ds = DS18B20.get_available_sensors()
+
+if len(ds) == 1:
+    ds = DS18B20(ds[0])
+else:
+    ds = None
+
 while True:
-    t = temp.get_temperature()
-    a = temp.get_adc()
-    print("Name:", temp.get_id(), "Ch 0:", a, "Temp:", t)
+    t = spi.get_temperature()
+    a = spi.get_adc()
+    print("Name:", spi.get_id(), "Ch 0:", a, "Temp:", t)
+
+    if ds is not None:
+        print("Name:", ds.get_id(), "Temp:", ds.get_temperature())
+
     time.sleep(2)
 
 # double rV = ((1024D/adcValue) - 1D)*1000D;
