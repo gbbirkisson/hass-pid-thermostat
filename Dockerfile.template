@@ -8,9 +8,7 @@ RUN apt-get update && apt-get install -y git build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /hass
-COPY ./src ./
 
-# Enable udevd so that plugged dynamic hardware devices show up in our container.
-ENV UDEV=1
+COPY ./src ./
 
 ENTRYPOINT ["/hass/entrypoint.sh"]
