@@ -192,6 +192,7 @@ atexit.register(kill)
 logging.info("Starting controller")
 
 if __name__ == "__main__":
+    logging.getLogger().handlers = []
     setup_logging()
     with Mqtt(env('MQTT_HOST', 'localhost'), env('MQTT_USER'), env('MQTT_PASS')) as mqtt:
         func_limiter, pid, registry, climate = create_components(mqtt)
