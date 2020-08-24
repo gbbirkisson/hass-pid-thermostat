@@ -81,7 +81,7 @@ else:
 
 while True:
     print("DS:", ds.get_temperature(), "SPI:", spi.get_temperature())
-    time.sleep(1)
+    time.sleep(10)
 
 # double rV = ((1024D/adcValue) - 1D)*1000D;
 # //Steinhart-Hart model coefficients
