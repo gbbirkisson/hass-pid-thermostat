@@ -11,9 +11,12 @@ from ha_mqtt.sensor import ErrorSensor, Sensor, SettableSensor
 from ha_mqtt.switch import Switch
 from ha_mqtt.util import setup_logging, sleep_for, env_bool, env, id_from_name, env_name, env_float
 
+from devices.rpi import cpu_temp
 from pid import Pid, PidSensor, TimeOnTarget
 
-if env_bool('SIMULATE', False):
+SIMULATE = env_bool('SIMULATE', False)
+
+if SIMULATE:
     from devices.devices_fake import create_ssr, create_temp_sensors
 else:
     from devices.devices import create_ssr, create_temp_sensors
@@ -169,6 +172,15 @@ def create_components(mqtt_broker):
         # state_topic=state
     )
     reg.add_component(climate)
+
+    if not SIMULATE:
+        # RPI temp sensor
+        reg.add_component(Sensor(
+            with_prefix('Temp CPU'),
+            '°C',
+            state_func=cpu_temp,
+            **standard_config
+        ))
 
     cfg = reg.create_config()
     file = '/tmp/ha-cfg.yml'
