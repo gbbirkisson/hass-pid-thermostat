@@ -4,13 +4,13 @@ import spidev
 
 # Steinhart-Hart model coefficients
 # R1: 100000 T1: 27
-# R2: 35000  T2: 54
-# R3: 10000  T3: 90
+# R2: 31500  T2: 55
+# R3: 9850  T3: 90
 
 # https://www.thinksrs.com/downloads/programs/therm%20calc/ntccalibrator/ntccalculator.html
-SHC_A = 1.054874183E-03
-SHC_B = 1.607766285E-04
-SHC_C = 2.790180084E-07
+SHC_A = 0.2610558231E-03
+SHC_B = 2.787741809E-04
+SHC_C = -0.9101826706E-07
 
 # Aux resistor
 # https://www.hackster.io/ahmartareen/iot-temperature-sensor-with-raspberry-pi-2-and-thermistor-7e12db
