@@ -170,8 +170,13 @@ def create_components(mqtt_broker):
     )
     reg.add_component(climate)
 
+    cfg = reg.create_config()
+    file = '/tmp/ha-cfg.yml'
+    with open(file, 'w') as f:
+        f.write(cfg)
+
     if env_bool('HA_PRINT_CONFIG', False):
-        logging.info("HA config:\n{}".format(reg.create_config()))
+        logging.info("HA config:\n{}".format(cfg))
 
     return func_limit, pid_controller, reg, climate
 

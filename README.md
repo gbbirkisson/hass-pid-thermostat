@@ -38,6 +38,7 @@ Enable [mqtt discovery](https://www.home-assistant.io/docs/mqtt/discovery).
 | HA_COMPONENT_PREFIX    | no       | Brew      | Prefix for component names                                                                                                   |
 | HA_AVAILABLE           | no       | false     | Send available message to HA on startup                                                                                      |
 | HA_AUTO                | no       | false     | Send auto discovery messages to HA on startup                                                                                |
+| HA_PRINT_CONFIG        | no       | false     | Print HA config on startup                                                                                                   |
 | SSR_PIN                | no       | GPIO18    | [Pin name](https://gpiozero.readthedocs.io/en/stable/recipes.html#pin-numbering) on the Raspberry PI the SSR is connected to |
 | MQTT_HOST              | no       | localhost | The host of the MQTT server to communicate with HA                                                                           |
 | MQTT_USER              | no       |           | MQTT user                                                                                                                    |
