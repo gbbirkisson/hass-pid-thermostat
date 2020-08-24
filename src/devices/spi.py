@@ -3,14 +3,14 @@ import math
 import spidev
 
 # Steinhart-Hart model coefficients
-# R1: 100000 T1: 26
-# R2: 22000  T2: 65
-# R3: 10500  T3: 90
+# R1: 100000 T1: 27
+# R2: 35000  T2: 54
+# R3: 10000  T3: 90
 
 # https://www.thinksrs.com/downloads/programs/therm%20calc/ntccalibrator/ntccalculator.html
-SHC_A = -0.2296397932E-03
-SHC_B = 3.431137143E-04
-SHC_C = -2.439053114E-07
+SHC_A = 1.054874183E-03
+SHC_B = 1.607766285E-04
+SHC_C = 2.790180084E-07
 
 # Aux resistor
 # https://www.hackster.io/ahmartareen/iot-temperature-sensor-with-raspberry-pi-2-and-thermistor-7e12db
@@ -56,6 +56,7 @@ class SpiTempSensor:
             return None
         rv = (ADC_RES / adc - 1) * AUX_RES
         temp_kelvin = 1 / (SHC_A + (SHC_B * math.log(rv)) + (SHC_C * math.pow(math.log(rv), 3)))
+        # = (1 / ($F$1 + ($F$2 * LN(D1)) + ($F$3 * POW(LN(D1),3)))) - 273.15
         return temp_kelvin - 273.15
 
     def get_id(self):
