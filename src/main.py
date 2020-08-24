@@ -180,8 +180,9 @@ RUN = True
 
 
 def kill(*args):
-    logging.info("Stopping controller")
     global RUN
+    if RUN:
+        logging.info("Stopping controller")
     RUN = False
 
 
@@ -189,11 +190,10 @@ signal.signal(signal.SIGINT, kill)
 signal.signal(signal.SIGTERM, kill)
 atexit.register(kill)
 
-logging.info("Starting controller")
-
 if __name__ == "__main__":
     logging.getLogger().handlers = []
     setup_logging()
+    logging.info("Starting controller")
     with Mqtt(env('MQTT_HOST', 'localhost'), env('MQTT_USER'), env('MQTT_PASS')) as mqtt:
         func_limiter, pid, registry, climate = create_components(mqtt)
         with registry:
