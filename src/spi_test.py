@@ -80,7 +80,7 @@ else:
     ds = None
 
 while True:
-    print("DS:", ds.get_temperature(), "SPI:", spi.get_temperature())
+    print("{}\t{}\t{}".format(ds.get_temperature(), spi.get_temperature(), spi.get_adc()))
     time.sleep(10)
 
 # double rV = ((1024D/adcValue) - 1D)*1000D;

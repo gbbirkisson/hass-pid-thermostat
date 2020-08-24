@@ -3,7 +3,7 @@ import math
 import spidev
 
 # Steinhart-Hart model coefficients
-# R1: 100000 T1: 25.5
+# R1: 100000 T1: 26
 # R2: 22000  T2: 65
 # R3: 10500  T3: 90
 
