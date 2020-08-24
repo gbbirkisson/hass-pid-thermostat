@@ -172,6 +172,7 @@ def create_components(mqtt_broker):
 
     cfg = reg.create_config()
     file = '/tmp/ha-cfg.yml'
+    logging.info("Writing HA config to file: {}".format(file))
     with open(file, 'w') as f:
         f.write(cfg)
 
@@ -204,8 +205,11 @@ if __name__ == "__main__":
         with registry:
             registry.send_updates(force_all=True)
             climate.send_update(all_topics=True)
+
+            logging.info("Entering main loop")
             while RUN:
                 func_limiter.clear()
                 pid.update()
                 registry.send_updates()
                 sleep_for(env_float('SLEEP_PER_ITERATION', 0))
+            logging.info("Exiting main loop")
