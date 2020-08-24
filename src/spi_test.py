@@ -80,14 +80,7 @@ else:
     ds = None
 
 while True:
-    print("loop")
-    if ds is not None:
-        print("Name:", ds.get_id(), "Temp:", ds.get_temperature())
-
-    t = spi.get_temperature()
-    a = spi.get_adc()
-    print("Name:", spi.get_id(), "Ch 0:", a, "Temp:", t)
-
+    print("DS:", ds.get_temperature(), "SPI:", spi.get_temperature())
     time.sleep(1)
 
 # double rV = ((1024D/adcValue) - 1D)*1000D;

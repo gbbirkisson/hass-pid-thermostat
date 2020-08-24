@@ -53,6 +53,8 @@ class SpiTempSensor:
 
     def get_temperature(self):
         adc = self._get_adc()
+        if adc == 0:
+            return None
         rv = (ADC_RES / adc - 1) * AUX_RES
         temp_kelvin = 1 / (SHC_A + (SHC_B * math.log(rv)) + (SHC_C * math.pow(math.log(rv), 3)))
         return temp_kelvin - 273.15
