@@ -8,9 +8,9 @@ import spidev
 # R3: 9850  T3: 90
 
 # https://www.thinksrs.com/downloads/programs/therm%20calc/ntccalibrator/ntccalculator.html
-SHC_A = 0.2610558231E-03
-SHC_B = 2.787741809E-04
-SHC_C = -0.9101826706E-07
+SHC_A = 0.7614423613E-03
+SHC_B = 2.016370535E-04
+SHC_C = 1.776802856E-07
 
 # Aux resistor
 # https://www.hackster.io/ahmartareen/iot-temperature-sensor-with-raspberry-pi-2-and-thermistor-7e12db

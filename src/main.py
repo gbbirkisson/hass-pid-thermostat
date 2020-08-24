@@ -56,6 +56,7 @@ def create_components(mqtt_broker):
     func_limit = create_func_call_limiter()
     ha_sensors = []
     for s in create_temp_sensors():
+        logging.info("Found temp sensor: {}".format(s.get_id()))
         # Wrap state function to catch errors
         state_func = func_limit.wrap(create_func_result_cache(errors.wrap_function(s.get_temperature)))
         ha_sensors.append(Sensor(
@@ -179,6 +180,7 @@ RUN = True
 
 
 def kill(*args):
+    logging.info("Stopping controller")
     global RUN
     RUN = False
 
@@ -186,6 +188,8 @@ def kill(*args):
 signal.signal(signal.SIGINT, kill)
 signal.signal(signal.SIGTERM, kill)
 atexit.register(kill)
+
+logging.info("Starting controller")
 
 if __name__ == "__main__":
     setup_logging()
