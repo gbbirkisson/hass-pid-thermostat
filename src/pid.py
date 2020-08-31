@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from ha_mqtt.util import env_float
 from simple_pid import PID
@@ -86,6 +87,7 @@ class Pid:
         self._create_controller()
 
     def state_change(self, mode, target):
+        logging.info('State changed [mode: {}, target: {}'.format(mode, target))
         if mode == 'off':
             self._mode = 'off'
             self._target = 0.0
