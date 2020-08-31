@@ -29,6 +29,17 @@ def with_prefix(s=None):
     return p + ' ' + s
 
 
+def wrap_sensor(errors, func_limit, s):
+    def sf():
+        try:
+            return s.get_temperature()
+        except:
+            logging.error('Failed reading sensor: ' + s.get_id())
+            raise
+
+    return func_limit.wrap(create_func_result_cache(errors.wrap_function(sf)))
+
+
 def create_components(mqtt_broker):
     # Get settings
     availability_topic = env_bool('HA_AVAILABLE', False)
@@ -61,21 +72,11 @@ def create_components(mqtt_broker):
     for s in create_temp_sensors():
         logging.info("Found temp sensor: {}".format(s.get_id()))
 
-        # Create state function
-        name = with_prefix('Temp ' + env_name(s.get_id()))
-        def sf():
-            try:
-                return s.get_temperature()
-            except:
-                logging.error('Failed reading sensor: ' + name)
-                raise
-
         # Wrap state function to catch errors
-        state_func = func_limit.wrap(create_func_result_cache(errors.wrap_function(sf)))
         ha_sensors.append(Sensor(
-            name,
+            with_prefix('Temp ' + env_name(s.get_id())),
             '°C',
-            state_func=state_func,
+            state_func=wrap_sensor(errors, func_limit, s),
             **standard_config
         ))
 
