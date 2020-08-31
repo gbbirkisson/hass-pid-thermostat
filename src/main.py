@@ -60,14 +60,25 @@ def create_components(mqtt_broker):
     ha_sensors = []
     for s in create_temp_sensors():
         logging.info("Found temp sensor: {}".format(s.get_id()))
+
+        # Create state function
+        name = with_prefix('Temp ' + env_name(s.get_id()))
+        def sf():
+            try:
+                return s.get_temperature()
+            except:
+                logging.error('Failed reading sensor: ' + name)
+                raise
+
         # Wrap state function to catch errors
-        state_func = func_limit.wrap(create_func_result_cache(errors.wrap_function(s.get_temperature)))
+        state_func = func_limit.wrap(create_func_result_cache(errors.wrap_function(sf)))
         ha_sensors.append(Sensor(
-            with_prefix('Temp ' + env_name(s.get_id())),
+            name,
             '°C',
             state_func=state_func,
             **standard_config
         ))
+
     reg.add_component(ha_sensors)
 
     # Setup temp sensor counter
