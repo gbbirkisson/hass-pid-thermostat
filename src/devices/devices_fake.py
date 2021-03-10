@@ -56,6 +56,7 @@ def temp_func():
 def create_temp_sensors():
     return [
         FakeTemp('outer', temp_func),
+        FakeTemp('aux', lambda: 20),
         FakeTemp('inner', lambda: 40),
         FakeTemp('bottom', lambda: 60),
         FakeTemp('faucet', lambda: 80)

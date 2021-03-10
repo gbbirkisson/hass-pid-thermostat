@@ -203,7 +203,7 @@ def create_components(mqtt_broker):
     if env_bool('HA_PRINT_CONFIG', False):
         logging.info("HA config:\n{}".format(cfg))
 
-    return func_limit, pid_controller, reg, climate
+    return func_limit, pid_controller, reg, climate, errors
 
 
 RUN = True
@@ -225,7 +225,8 @@ if __name__ == "__main__":
     setup_logging()
     logging.info("Starting controller")
     with Mqtt(env('MQTT_HOST', 'localhost'), env('MQTT_USER'), env('MQTT_PASS')) as mqtt:
-        func_limiter, pid, registry, climate = create_components(mqtt)
+        func_limiter, pid, registry, climate, err = create_components(mqtt)
+        mqtt.subscribe('homeassistant/command/brew_reset_errors', lambda x: err.reset())
         with registry:
             registry.send_updates(force_all=True)
             climate.send_update(all_topics=True)
@@ -235,5 +236,5 @@ if __name__ == "__main__":
                 func_limiter.clear()
                 pid.update()
                 registry.send_updates()
-                sleep_for(env_float('SLEEP_PER_ITERATION', 0))
+                sleep_for(env_float('SLEEP_PER_ITERATION', 1))
             logging.info("Exiting main loop")
