@@ -1,3 +1,4 @@
+<img align="right" width="128" height="128" src="logo.png">
 <h1>hass-pid-thermostat</h1>
 
 A PID (climate) controller for [Home Assistant](https://www.home-assistant.io/) to heat something using a thermometer and a SSR relay. Here is an example of a card that shows up in Home Assistant:
