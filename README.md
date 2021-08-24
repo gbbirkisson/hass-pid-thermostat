@@ -3,15 +3,12 @@
 
 A PID (climate) controller for [Home Assistant](https://www.home-assistant.io/) to heat something using a thermometer and a SSR relay. Here is an example of a card that shows up in Home Assistant:
 
-![Card](docs/hass.png)
-
-<h1>Table of Contents</h1>
-
 - [Setup](#setup)
   - [Home Assistant](#home-assistant)
   - [Deploy with Balena.io](#deploy-with-balenaio)
 - [Configuration](#configuration)
 - [Home Assistant](#home-assistant-1)
+- [Dashboard](#dashboard)
 - [Electrical Components](#electrical-components)
   - [Parts I used](#parts-i-used)
   - [Wiring](#wiring)
@@ -24,12 +21,12 @@ Enable [mqtt discovery](https://www.home-assistant.io/docs/mqtt/discovery).
 
 ### Deploy with Balena.io
 
-* Add a custom fleet configuration variable in project:
-    * `BALENA_HOST_CONFIG_dtoverlay=w1-gpio`
-* Add remote your balena remote:
-    * `git remote add balena <USERNAME>@git.balena-cloud.com:<USERNAME>/<APPNAME>.git`
-* Push to balena:
-    * `git push balena master`
+- Add a custom fleet configuration variable in project:
+  - `BALENA_HOST_CONFIG_dtoverlay=w1-gpio`
+- Add remote your balena remote:
+  - `git remote add balena <USERNAME>@git.balena-cloud.com:<USERNAME>/<APPNAME>.git`
+- Push to balena:
+  - `git push balena master`
 
 ## Configuration
 
@@ -56,16 +53,22 @@ Enable [mqtt discovery](https://www.home-assistant.io/docs/mqtt/discovery).
 
 Component names may differ, but for simulation you can use the [HA config](./hass/configuration.yaml) and [HA dash config](./hass/lovelace.yaml) in this repository.
 
+## Dashboard
+
+Here is how the dashboard can look like in HA:
+
+![Card](docs/hass.png)
+
 ## Electrical Components
 
-> **_VERY IMPORTANT NOTE:_**  THIS IS NOT A HOW-TO instructional guide. This explains how I used a Raspberry Pi to control electric current. However, I am NOT an electrician, and just because I did something doesn’t mean YOU should, particularly if you are unfamiliar with how to wire electrical devices safely. If you choose to follow the method I used, you do so at your own risk.
+> **_VERY IMPORTANT NOTE:_** THIS IS NOT A HOW-TO instructional guide. This explains how I used a Raspberry Pi to control electric current. However, I am NOT an electrician, and just because I did something doesn’t mean YOU should, particularly if you are unfamiliar with how to wire electrical devices safely. If you choose to follow the method I used, you do so at your own risk.
 
 ### Parts I used
 
-* [Raspberry PI model B](https://www.google.com/search?q=Raspberry+PI+Model+B)
-* [Kudom 40 A Solid State Relay](https://www.google.com/search?q=Kudom+40+A+Solid+State+Relay)
-* [DS18b20 temperature sensor](https://www.google.com/search?q=ds18b20+temperature+sensor)
-* [4.7k ohm resistor](https://www.google.com/search?q=4.7k+ohm+resistor)
+- [Raspberry PI model B](https://www.google.com/search?q=Raspberry+PI+Model+B)
+- [Kudom 40 A Solid State Relay](https://www.google.com/search?q=Kudom+40+A+Solid+State+Relay)
+- [DS18b20 temperature sensor](https://www.google.com/search?q=ds18b20+temperature+sensor)
+- [4.7k ohm resistor](https://www.google.com/search?q=4.7k+ohm+resistor)
 
 ### Wiring
 
